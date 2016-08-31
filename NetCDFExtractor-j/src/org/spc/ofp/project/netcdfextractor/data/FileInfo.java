@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  * Pre-load NetCDF files for the navigator UI.
@@ -32,4 +34,23 @@ public final class FileInfo {
     public String toString() {
         return file.getFileName().toString();
     }
+    
+    /**
+    * Sets whether this file is selected.
+    */
+    private final BooleanProperty selected = new SimpleBooleanProperty(this, "sekected", false);
+
+    public final boolean isSelected() {
+        return selected.get();
+    }
+
+    public final void setSelected(final boolean value) {
+        selected.set(value);
+    }
+
+    public final BooleanProperty selectedProperty() {
+        return selected;
+    }
+    
+    
 }
