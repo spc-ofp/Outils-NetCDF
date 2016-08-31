@@ -40,7 +40,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
      */
     public BatchExtractToTxtTask(final Path... files) throws IllegalArgumentException {
         if (files.length == 0) {
-            throw new IllegalArgumentException("Nothing to export.");
+            throw new IllegalArgumentException("Nothing to export."); // NOI18N.
         }
         this.files = files;
     }
@@ -48,7 +48,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         totalProgress = 2 * files.length;
-        final String separator = ",";
+        final String separator = ","; // NOI18N.
         // Export files.
         for (final Path file : files) {
             // Output name.

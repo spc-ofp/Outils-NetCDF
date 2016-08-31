@@ -306,11 +306,11 @@ public final class MainUIController implements Initializable {
             }
         };
         service.setOnSucceeded(workerStateEvent -> {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction succeeded.");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction succeeded."); // NOI18N.
             exportServices.remove(service);
         });
         service.setOnCancelled(workerStateEvent -> {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction cancelled.");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction cancelled."); // NOI18N.
             exportServices.remove(service);
         });
         service.setOnFailed(workerStateEvent -> {
