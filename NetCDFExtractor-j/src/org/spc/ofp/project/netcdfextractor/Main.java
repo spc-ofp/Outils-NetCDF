@@ -5,9 +5,9 @@
  ***********************************************************************/
 package org.spc.ofp.project.netcdfextractor;
 
-import com.sun.glass.ui.Screen;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -18,8 +18,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.scenicview.ScenicView;
 
 /**
  * Application class.
@@ -49,14 +49,22 @@ public final class Main extends Application {
         cssURLOptional.ifPresent(cssURL -> scene.getStylesheets().add(cssURL.toExternalForm()));
         primaryStage.setTitle(bundle.getString("app.title")); // NOI18N.               
         primaryStage.setScene(scene);
+        final double minWidth = 400;
+        final double minHeight = 400;
+        primaryStage.setMinWidth(minWidth);
+        primaryStage.setMinHeight(minHeight);
         final double stageWidth = prefs.getDouble("stage.width", 800);
         final double stageHeight = prefs.getDouble("stage.height", 600);
-        final double stageX = prefs.getDouble("stage.x", (Screen.getMainScreen().getWidth() - stageWidth) / 2);
-        final double stageY = prefs.getDouble("stage.y", (Screen.getMainScreen().getHeight()- stageHeight) / 2);
+        final double stageX = prefs.getDouble("stage.x", (Screen.getPrimary().getBounds().getWidth() - stageWidth) / 2d);
+        final double stageY = prefs.getDouble("stage.y", (Screen.getPrimary().getBounds().getHeight() - stageHeight) / 2d);
         primaryStage.setX(stageX);
         primaryStage.setY(stageY);
         primaryStage.setWidth(stageWidth);
         primaryStage.setHeight(stageHeight);
+        final List<Screen> screenList = Screen.getScreensForRectangle(stageX, stageY, stageWidth, stageHeight);
+        if (screenList.isEmpty()) {
+            primaryStage.centerOnScreen();
+        }
         primaryStage.show();
         primaryStage.xProperty().addListener(observable -> prefs.putDouble("stage.x", primaryStage.getX()));
         primaryStage.yProperty().addListener(observable -> prefs.putDouble("stage.y", primaryStage.getY()));
