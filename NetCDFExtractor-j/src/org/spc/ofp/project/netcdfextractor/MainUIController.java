@@ -8,6 +8,7 @@ package org.spc.ofp.project.netcdfextractor;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,8 @@ import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
+import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
+import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
 import org.spc.ofp.project.netcdfextractor.task.ImageGenerationTask;
 import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
@@ -278,31 +281,43 @@ public final class MainUIController implements Initializable {
      * Export selected files.
      */
     private void exportFiles() {
-        final TreeItem<FileInfo> root = treeView.getRoot();
+        final TreeItem<Object> root = treeView.getRoot();
         if (root == null) {
             return;
         }
-        final Path[] files = root.getChildren()
+        final BatchExtractToTxtParametersBuilder builder = BatchExtractToTxtParametersBuilder.create();
+        root.getChildren()
                 .stream()
-                .map(treeItem -> treeItem.getValue())
-                .filter(fileInfo -> fileInfo.isSelected())
-                .map(FileInfo::getFile)
-                .toArray(Path[]::new);
-        doExportFilesAsync(files);
+                .forEach(fileItem -> {
+                    final FileInfo fileInfo = (FileInfo) fileItem.getValue();
+                    final Path file = fileInfo.getFile();
+                    final String[] variables = fileItem.getChildren()
+                            .stream()
+                            .map(variableItem -> (VariableInfo) variableItem.getValue())
+                            .filter(variableInfo -> variableInfo.isSelected())
+                            .map(VariableInfo::getFullName)
+                            .toArray(String[]::new);
+                    if (variables.length > 0) {
+                        Arrays.stream(variables)
+                                .forEach(variable -> builder.addVariable(file, variable));
+                    }
+                });
+        final BatchExtractToTxtParameters parameters = builder.build();
+        if (parameters.isEmpty()) {
+            return;
+        }
+        doExportFilesAsync(parameters);
     }
 
     /**
      * Do the export asynchronously.
      * @param files Files to export.
      */
-    private void doExportFilesAsync(final Path... files) {
-        if (files.length == 0) {
-            return;
-        }
+    private void doExportFilesAsync(final BatchExtractToTxtParameters parameters) {
         final Service<Void> service = new Service() {
             @Override
             protected Task createTask() {
-                return new BatchExtractToTxtTask(files);
+                return new BatchExtractToTxtTask(parameters);
             }
         };
         service.setOnSucceeded(workerStateEvent -> {

@@ -16,6 +16,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import javafx.concurrent.Task;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -30,37 +31,38 @@ import ucar.nc2.Variable;
 public class BatchExtractToTxtTask extends Task<Void> {
 
     /**
-     * The files to export.
+     * The task parameters
      */
-    final Path[] files;
+    private final BatchExtractToTxtParameters parameters;
 
     /**
      * Creates a new instance.
-     * @param files The files to export.
+     * @param parameters The task parameters
      * @throws IllegalArgumentException If there is no files to export.
      */
-    public BatchExtractToTxtTask(final Path... files) throws IllegalArgumentException {
-        if (files.length == 0) {
-            throw new IllegalArgumentException("Nothing to export."); // NOI18N.
-        }
-        this.files = files;
+    public BatchExtractToTxtTask(final BatchExtractToTxtParameters parameters) throws IllegalArgumentException {
+        Objects.requireNonNull(parameters);
+        this.parameters = parameters;
     }
 
     @Override
     protected Void call() throws Exception {
-        totalProgress = 2 * files.length;
-        final String separator = ","; // NOI18N.
+        final Set<Path> files = parameters.getFiles();
+        totalProgress = 2 * files.size();
         // Export files.
         for (final Path file : files) {
-            // Output name.
-            final Path output = createDefaultDestination(file);
+            // Settings.
+            final BatchExtractToTxtParameters.Settings settings = parameters.getSettings(file);
+            final String separator = settings.getSeparator();
+            final Path output = settings.getDestination();
+            final String[] variables = settings.getVariables().toArray(new String[0]);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return null;
             }
             // Export.
-            exportFile(file, output, separator);
+            exportFile(file, output, separator, variables);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
@@ -96,11 +98,11 @@ public class BatchExtractToTxtTask extends Task<Void> {
      * @throws IOException In case of IO error.
      * @throws InvalidRangeException NetCDF index error, should never happen.
      */
-    private void exportFile(final Path source, final Path destination, final String separator) throws IOException, InvalidRangeException {
+    private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
             // Collect variables.
-            final Variable[] variables = netcdf.getVariables()
-                    .stream()
+            final Variable[] variables = Arrays.stream(variableNames)
+                    .map(netcdf::findVariable)
                     .filter(variable -> variable.getRank() == 3)
                     .toArray(Variable[]::new);
             totalProgress += 1;
