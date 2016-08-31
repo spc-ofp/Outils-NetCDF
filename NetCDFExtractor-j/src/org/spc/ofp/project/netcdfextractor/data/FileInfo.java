@@ -1,0 +1,35 @@
+/***********************************************************************
+ *  Copyright - Secretariat of the Pacific Community                   *
+ *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
+ *  http://www.spc.int/                                                *
+ ***********************************************************************/
+package org.spc.ofp.project.netcdfextractor.data;
+
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Pre-load NetCDF files for the navigator UI.
+ * @author Fabrice Bouyé (fabriceb@spc.int)
+ */
+public final class FileInfo {
+
+    private final Path file;
+    private final List<String> variables;
+
+    public FileInfo(final Path file, final String... variables) {
+        this.file = file;
+        this.variables = Collections.unmodifiableList(Arrays.asList(variables));
+    }
+
+    public Path getFile() {
+        return file;
+    }
+
+    @Override
+    public String toString() {
+        return file.getFileName().toString();
+    }
+}

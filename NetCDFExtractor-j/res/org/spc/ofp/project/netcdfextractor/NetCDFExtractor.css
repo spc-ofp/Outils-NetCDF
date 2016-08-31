@@ -1,0 +1,10 @@
+/***********************************************************************
+ *  Copyright - Secretariat of the Pacific Community                   *
+ *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
+ *  http://www.spc.int/                                                *
+ ***********************************************************************/
+.dir-hbox {
+    -fx-padding: 3px;
+    -fx-spacing: 3px;
+    -fx-alignment: baseline-left;
+}

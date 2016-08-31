@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright - Secretariat of the Pacific Community                   
+ Droit de copie - Secrétariat Général de la Communauté du Pacifique 
+ http://www.spc.int/                                                
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane id="rootPane" fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.MainUIController">
+    <top>
+        <MenuBar id="menuBar" fx:id="menuBar" BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="%menu.file">
+                    <items>
+                        <MenuItem id="openItem" fx:id="openItem" mnemonicParsing="false" onAction="#handleOpenItem" text="%menu.file.open" />
+                        <MenuItem id="closeItem" fx:id="closeItem" mnemonicParsing="false" onAction="#handleCloseItem" text="%menu.file.close" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem id="exitItem" fx:id="exitItem" mnemonicParsing="false" onAction="#handleExitItem" text="%menu.file.exit" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="%menu.help">
+                    <items>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <bottom>
+        <ProgressBar id="progressBar" fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" />
+    </bottom>
+    <center>
+        <StackPane id="contentPane" fx:id="contentPane" prefHeight="-1" prefWidth="-1" BorderPane.alignment="CENTER">
+         <children>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <HBox fx:id="dirHBox" styleClass="dir-hbox">
+                     <children>
+                        <TextField fx:id="dirField" promptText="%dir.prompt" HBox.hgrow="ALWAYS">
+                           <tooltip>
+                              <Tooltip fx:id="dirFieldTip" text="Empty Tooltip" />
+                           </tooltip>
+                        </TextField>
+                        <Button fx:id="dirButton" mnemonicParsing="false" onAction="#handleDirButton" text="%dir.browse" HBox.hgrow="NEVER">
+                           <tooltip>
+                              <Tooltip fx:id="dirButtonTip" text="%dir.browse.tip" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+                      <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.25" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                          <items>
+                              <TreeView id="treeView" fx:id="treeView" prefHeight="200.0" prefWidth="200.0" showRoot="false" />
+                              <StackPane>
+                                  <children>
+                                      <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
+                                  </children>
+                              </StackPane>
+                          </items>
+                      </SplitPane>
+               </children>
+            </VBox>
+         </children>
+        </StackPane>
+    </center>
+</BorderPane>
