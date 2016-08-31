@@ -41,14 +41,20 @@ public final class NetCDFTreeCell extends TreeCell {
     /**
      * Current info.
      */
-    private FileInfo fileInfo;
+    private Object object;
 
     @Override
     protected void updateItem(final Object item, final boolean empty) {
         super.updateItem(item, empty);
-        if (fileInfo != null && fileInfo != item) {
-            checkBox.selectedProperty().unbindBidirectional(fileInfo.selectedProperty());
-            fileInfo = null;
+        if (object != null && object != item) {
+            if (object instanceof FileInfo) {
+                final FileInfo fileInfo = (FileInfo) object;
+                checkBox.selectedProperty().unbindBidirectional(fileInfo.selectedProperty());
+            } else if (object instanceof VariableInfo) {
+                final VariableInfo variableInfo = (VariableInfo) object;
+                checkBox.selectedProperty().unbindBidirectional(variableInfo.selectedProperty());
+            }
+            object = null;
         }
         String text = null;
         Node graphic = null;
@@ -56,14 +62,19 @@ public final class NetCDFTreeCell extends TreeCell {
             if (item instanceof FileInfo) {
                 final FileInfo info = (FileInfo) item;
                 text = info.toString();
-                graphic = checkBox;
-                if (fileInfo != info) {
-                    fileInfo = info;
-                    checkBox.selectedProperty().bindBidirectional(info.selectedProperty());
-                }
+//                graphic = checkBox;
+//                if (object != info) {
+//                    object = info;
+//                    checkBox.selectedProperty().bindBidirectional(info.selectedProperty());
+//                }
             } else if (item instanceof VariableInfo) {
                 final VariableInfo info = (VariableInfo) item;
                 text = info.toString();
+                graphic = checkBox;
+                if (object != info) {
+                    object = info;
+                    checkBox.selectedProperty().bindBidirectional(info.selectedProperty());
+                }
             }
         }
         setText(text);
