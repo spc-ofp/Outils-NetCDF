@@ -8,6 +8,8 @@ package org.spc.ofp.project.netcdfextractor;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -33,6 +35,7 @@ import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
+import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
 import org.spc.ofp.project.netcdfextractor.task.ImageGenerationTask;
 import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
 
@@ -98,6 +101,11 @@ public final class MainUIController implements Initializable {
     @FXML
     private void handleDirButton() {
         browseForDirectory();
+    }
+
+    @FXML
+    private void handleExtractItem() {
+        exportFiles();
     }
 
     private void browseForDirectory() {
@@ -257,6 +265,61 @@ public final class MainUIController implements Initializable {
             cleanupGenerateImage();
         });
         generateImageServiceOptional = Optional.of(service);
+        service.start();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Stores all export services while they are running (to avoid early GC).
+     */
+    private final List<Service> exportServices = new LinkedList();
+
+    /**
+     * Export selected files.
+     */
+    private void exportFiles() {
+        final TreeItem<FileInfo> root = treeView.getRoot();
+        if (root == null) {
+            return;
+        }
+        final Path[] files = root.getChildren()
+                .stream()
+                .map(treeItem -> treeItem.getValue())
+                .filter(fileInfo -> fileInfo.isSelected())
+                .map(FileInfo::getFile)
+                .toArray(Path[]::new);
+        doExportFilesAsync(files);
+    }
+
+    /**
+     * Do the export asynchronously.
+     * @param files Files to export.
+     */
+    private void doExportFilesAsync(final Path... files) {
+        if (files.length == 0) {
+            return;
+        }
+        final Service<Void> service = new Service() {
+            @Override
+            protected Task createTask() {
+                return new BatchExtractToTxtTask(files);
+            }
+        };
+        service.setOnSucceeded(workerStateEvent -> {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction succeeded.");
+            exportServices.remove(service);
+        });
+        service.setOnCancelled(workerStateEvent -> {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Extraction cancelled.");
+            exportServices.remove(service);
+        });
+        service.setOnFailed(workerStateEvent -> {
+            final Throwable ex = workerStateEvent.getSource().getException();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            exportServices.remove(service);
+        });
+        exportServices.add(service);
+        progressBar.progressProperty().bind(service.progressProperty());
         service.start();
     }
 }
