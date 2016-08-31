@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Objects;
 import javafx.concurrent.Task;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -52,10 +53,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
         // Export files.
         for (final Path file : files) {
             // Output name.
-            final String dir = file.getParent().toString();
-            final String sourceName = file.getFileName().toString();
-            final String outputName = sourceName.replaceAll("\\.(nc|cdf)", ".txt"); // NOI18N.
-            final Path output = Paths.get(dir, outputName);
+            final Path output = createDefaultDestination(file);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
@@ -70,6 +68,21 @@ public class BatchExtractToTxtTask extends Task<Void> {
             }
         }
         return null;
+    }
+
+    /**
+     * Generate default destination file for given source file.
+     * @param source The source file.
+     * @return A {@code Path} instance, never {@code null}.
+     * @throws NullPointerException If {@code source} is {@code null}.
+     */
+    public static Path createDefaultDestination(final Path source) throws NullPointerException {
+        Objects.requireNonNull(source);
+        final String dir = source.getParent().toString();
+        final String sourceName = source.getFileName().toString();
+        final String outputName = sourceName.replaceAll("\\.(nc|cdf)", ".txt"); // NOI18N.
+        final Path destination = Paths.get(dir, outputName);
+        return destination;
     }
 
     private long progress = 0;
