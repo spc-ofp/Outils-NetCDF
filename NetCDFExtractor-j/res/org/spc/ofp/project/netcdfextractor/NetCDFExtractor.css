@@ -8,3 +8,10 @@
     -fx-spacing: 3px;
     -fx-alignment: baseline-left;
 }
+.netcdf-cell {    
+}
+.netcdf-cell .check-box {
+    -fx-graphic-text-gap: 0px;
+    -fx-label-padding: 0px;
+    -fx-padding: 0px;
+}

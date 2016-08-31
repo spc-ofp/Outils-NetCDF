@@ -34,10 +34,10 @@ public final class FileInfo {
     public String toString() {
         return file.getFileName().toString();
     }
-    
+
     /**
-    * Sets whether this file is selected.
-    */
+     * Sets whether this file is selected.
+     */
     private final BooleanProperty selected = new SimpleBooleanProperty(this, "sekected", false);
 
     public final boolean isSelected() {
@@ -51,6 +51,5 @@ public final class FileInfo {
     public final BooleanProperty selectedProperty() {
         return selected;
     }
-    
-    
+
 }

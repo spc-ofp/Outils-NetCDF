@@ -30,6 +30,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.stage.DirectoryChooser;
+import org.spc.ofp.project.netcdfextractor.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.task.ImageGenerationTask;
@@ -70,6 +71,7 @@ public final class MainUIController implements Initializable {
         dirFieldTip.textProperty().bind(dirField.textProperty());
         //
         treeView.getSelectionModel().selectedItemProperty().addListener(selectedTreeItemInvalidationListener);
+        treeView.setCellFactory(treeView -> new NetCDFTreeCell());
         //
         Platform.runLater(() -> {
             final File dir = new File(path);
