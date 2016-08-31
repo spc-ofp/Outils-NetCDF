@@ -11,6 +11,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
@@ -66,11 +67,11 @@
                       <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.25" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                           <items>
                               <TreeView id="treeView" fx:id="treeView" prefHeight="200.0" prefWidth="200.0" showRoot="false" />
-                              <StackPane>
-                                  <children>
+                              <ScrollPane>
+                                  <content>
                                       <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
-                                  </children>
-                              </StackPane>
+                                  </content>
+                              </ScrollPane>
                           </items>
                       </SplitPane>
                </children>
