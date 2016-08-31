@@ -5,6 +5,9 @@
  ***********************************************************************/
 package org.spc.ofp.project.netcdfextractor.data;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 /**
  * Pre-load NetCDF variable for the navigator UI.
  * @author Fabrice Bouyé (fabriceb@spc.int)
@@ -36,5 +39,24 @@ public final class VariableInfo {
 
     public String getDescription() {
         return description;
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Sets whether this variable is selected.
+     */
+    private final BooleanProperty selected = new SimpleBooleanProperty(this, "sekected", false); // NOI18N.
+
+    public final boolean isSelected() {
+        return selected.get();
+    }
+
+    public final void setSelected(final boolean value) {
+        selected.set(value);
+    }
+
+    public final BooleanProperty selectedProperty() {
+        return selected;
     }
 }
