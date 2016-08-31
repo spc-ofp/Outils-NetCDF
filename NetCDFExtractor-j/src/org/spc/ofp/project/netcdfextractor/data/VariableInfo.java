@@ -37,6 +37,4 @@ public final class VariableInfo {
     public String getDescription() {
         return description;
     }
-    
-    
 }
