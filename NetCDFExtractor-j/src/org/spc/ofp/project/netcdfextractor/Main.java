@@ -28,15 +28,15 @@ import javafx.stage.Stage;
  */
 public final class Main extends Application {
 
+    public static final ResourceBundle I18N = ResourceBundle.getBundle("org/spc/ofp/project/netcdfextractor/strings"); // NOI18N.
     private final Preferences prefs = Preferences.userNodeForPackage(getClass());
 
     @Override
     public void start(final Stage primaryStage) {
-        final ResourceBundle bundle = ResourceBundle.getBundle("org/spc/ofp/project/netcdfextractor/strings"); // NOI18N.
         final StackPane root = new StackPane();
         final Optional<URL> fxmlURLOptional = Optional.ofNullable(getClass().getResource("MainUI.fxml"));
         fxmlURLOptional.ifPresent(fxmlURL -> {
-            final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, bundle);
+            final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, I18N);
             try {
                 final Node mainUI = fxmlLoader.load();
                 root.getChildren().add(mainUI);
@@ -47,7 +47,7 @@ public final class Main extends Application {
         final Scene scene = new Scene(root);
         final Optional<URL> cssURLOptional = Optional.ofNullable(getClass().getResource("NetCDFExtractor.css")); // NOI18N.        
         cssURLOptional.ifPresent(cssURL -> scene.getStylesheets().add(cssURL.toExternalForm()));
-        primaryStage.setTitle(bundle.getString("app.title")); // NOI18N.               
+        primaryStage.setTitle(I18N.getString("app.title")); // NOI18N.               
         primaryStage.setScene(scene);
         final double minWidth = 400;
         final double minHeight = 400;
