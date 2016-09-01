@@ -7,6 +7,7 @@ package org.spc.ofp.project.netcdfextractor.scene.control.about.libraries;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
@@ -17,18 +18,17 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextFlow;
-import org.spc.ofp.project.netcdfextractor.Disposable;
+import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 
 /**
  * FXML controller class
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public final class LibrariesPaneController implements Initializable, Disposable {
+public final class LibrariesPaneController extends ControllerBase {
 
     @FXML
     private VBox rootPane;
@@ -42,6 +42,7 @@ public final class LibrariesPaneController implements Initializable, Disposable 
     @Override
     public void initialize(final URL url, final ResourceBundle bundle) {
         libraryPane = new LibraryPane();
+        libraryPane.applicationProperty().bind(applicationProperty());
         //
         tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangeListener);
         //
@@ -50,7 +51,15 @@ public final class LibrariesPaneController implements Initializable, Disposable 
 
     @Override
     public void dispose() {
-        tabPane.getSelectionModel().selectedItemProperty().removeListener(tabChangeListener);
+        try {
+            tabPane.getSelectionModel().selectedItemProperty().removeListener(tabChangeListener);
+            if (libraryPane != null) {
+                libraryPane.dispose();
+                libraryPane = null;
+            }
+        } finally {
+            super.dispose();
+        }
     }
 
     final Properties librariesProperties = new Properties();
@@ -60,16 +69,9 @@ public final class LibrariesPaneController implements Initializable, Disposable 
      */
     private final ChangeListener<Tab> tabChangeListener = (observable, oldValue, newValue) -> {
         Optional.ofNullable(oldValue)
-                .ifPresent(tab -> tab.setContent(null));
+                .ifPresent(this::uninstallTab);
         Optional.ofNullable(newValue)
-                .ifPresent(tab -> {
-                    final String library = (String) tab.getUserData();
-                    final String libraryName = librariesProperties.getProperty(String.format("%s.name", library)); // NOI18N.
-                    final String libraryVersion = librariesProperties.getProperty(String.format("%s.version", library)); // NOI18N.
-                    final String libraryOwner = librariesProperties.getProperty(String.format("%s.owner", library)); // NOI18N.
-                    libraryPane.updateContent(libraryName, libraryVersion, libraryOwner, null, null);
-                    tab.setContent(libraryPane);
-                });
+                .ifPresent(this::installTab);
     };
 
     private void populateLibraries() {
@@ -100,5 +102,30 @@ public final class LibrariesPaneController implements Initializable, Disposable 
         tab.setText(libraryName);
         tab.setUserData(library);
         return tab;
+    }
+
+    private void uninstallTab(final Tab tab) {
+        tab.setContent(null);
+        libraryPane.clearContent();
+    }
+
+    private void installTab(final Tab tab) {
+        final String library = (String) tab.getUserData();
+        final String libraryName = librariesProperties.getProperty(String.format("%s.name", library)); // NOI18N.
+        final String libraryVersion = librariesProperties.getProperty(String.format("%s.version", library)); // NOI18N.
+        final String libraryOwner = librariesProperties.getProperty(String.format("%s.owner", library)); // NOI18N.
+        final String libraryDescription = librariesProperties.getProperty(String.format("%s.description", library)); // NOI18N.
+        final String libraryHomepage = librariesProperties.getProperty(String.format("%s.url", library)); // NOI18N.
+        URL libraryURL = null;
+        try {
+            libraryURL = new URL(libraryHomepage);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(LibrariesPaneController.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+        }
+        final String libraryLicenseFile = librariesProperties.getProperty(String.format("%s.license", library)); // NOI18N.
+        URL licenseURL = null;
+        licenseURL = getClass().getResource(libraryLicenseFile);
+        libraryPane.updateContent(libraryName, libraryVersion, libraryOwner, libraryDescription, libraryURL, licenseURL);
+        tab.setContent(libraryPane);
     }
 }

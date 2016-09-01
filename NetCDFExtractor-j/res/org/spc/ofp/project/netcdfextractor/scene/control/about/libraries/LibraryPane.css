@@ -1,0 +1,27 @@
+.pane {
+    -fx-padding: 3px;
+    -fx-spacing: 3px;
+}
+.pane .name {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.2em;
+}
+.pane .version {
+    -fx-font-size: 1.2em;
+    -fx-opacity: 0.66;
+}
+.pane .owner {
+    -fx-font-style: italic;
+}
+.pane .home,
+.pane .home:focused {
+    -fx-border-color: null;
+    -fx-border-width: 0px;
+}
+.pane .license {
+    -fx-font-weight: bold;
+}
+.pane .license-area {
+    -fx-wrap-text: true;
+    -fx-font-family: "Monospace";
+}
