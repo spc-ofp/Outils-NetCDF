@@ -29,7 +29,7 @@ import ucar.nc2.Variable;
  * Batch extract to text files.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public class BatchExtractToTxtTask extends Task<Void> {
+public final class BatchExtractToTxtTask extends Task<Void> {
 
     /**
      * The task parameters
@@ -248,7 +248,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
                                     return;
                                 }
                             }
-                            // Write line.s
+                            // Write line.
                             line.delete(line.lastIndexOf(separator), line.length());
                             out.println(line.toString());
                             progress++;
