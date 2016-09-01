@@ -20,6 +20,7 @@ import java.util.Set;
 import javafx.concurrent.Task;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -203,7 +204,15 @@ public class BatchExtractToTxtTask extends Task<Void> {
                             vIndex[2] = x;
                             for (final Variable variable : variables) {
                                 final Array vArray = variable.read(vIndex, vShape);
-                                line.append(vArray.getFloat(0));
+                                final Attribute fillValueAttribute = variable.findAttribute("_FillValue"); // NOI18N.
+                                final double fillValue = fillValueAttribute.getNumericValue().doubleValue();
+                                final Attribute scaleFactorAttribute = variable.findAttribute("scale_factor"); // NOI18N.
+                                final double scaleFactor = scaleFactorAttribute.getNumericValue().doubleValue();
+                                final double variableValue = vArray.getDouble(0);
+                                final double value = variableValue * scaleFactor;
+                                if (value != fillValue) {
+                                    line.append(value);
+                                }
                                 line.append(separator);
                                 progress++;
                                 updateProgress(progress, totalProgress);
