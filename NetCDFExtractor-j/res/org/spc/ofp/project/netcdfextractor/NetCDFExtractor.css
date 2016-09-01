@@ -19,8 +19,18 @@
 }
 .netcdf-cell {    
 }
+.netcdf-cell:file {
+    -fx-content-display: right;
+}
 .netcdf-cell .check-box {
     -fx-graphic-text-gap: 0px;
     -fx-label-padding: 0px;
     -fx-padding: 0px;
+}
+.netcdf-cell .button {
+    -fx-background-color: null;
+    -fx-padding: 0px;
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.4em;
+    -fx-text-fill: derive(black, 35%);
 }
