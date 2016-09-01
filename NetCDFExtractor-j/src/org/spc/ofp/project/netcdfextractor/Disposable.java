@@ -7,7 +7,6 @@ package org.spc.ofp.project.netcdfextractor;
 
 /**
  * Defines disposable resources.
- * Application class.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public interface Disposable {
