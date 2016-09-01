@@ -122,6 +122,7 @@ public final class MainUIController implements Initializable {
         dialog.getDialogPane().setContent(librariesPane);
         dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CLOSE);
         dialog.showAndWait();
+        librariesPane.dispose();
     }
 
     private void browseForDirectory() {

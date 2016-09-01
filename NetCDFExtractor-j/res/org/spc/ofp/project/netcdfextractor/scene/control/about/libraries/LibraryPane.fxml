@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright - Secretariat of the Pacific Community                   
+ Droit de copie - Secrétariat Général de la Communauté du Pacifique 
+ http://www.spc.int/                                                
+-->
+
+<?import javafx.scene.layout.GridPane?>
+
+<fx:root id="GridPane" prefHeight="400.0" prefWidth="600.0" type="GridPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.60" fx:controller="org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibraryPaneController">
+    
+</fx:root>
