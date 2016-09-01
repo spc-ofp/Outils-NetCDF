@@ -203,11 +203,11 @@ public class BatchExtractToTxtTask extends Task<Void> {
                             vIndex[1] = y;
                             vIndex[2] = x;
                             for (final Variable variable : variables) {
-                                final Array vArray = variable.read(vIndex, vShape);
                                 final Attribute fillValueAttribute = variable.findAttribute("_FillValue"); // NOI18N.
                                 final double fillValue = fillValueAttribute.getNumericValue().doubleValue();
                                 final Attribute scaleFactorAttribute = variable.findAttribute("scale_factor"); // NOI18N.
                                 final double scaleFactor = scaleFactorAttribute.getNumericValue().doubleValue();
+                                final Array vArray = variable.read(vIndex, vShape);
                                 final double variableValue = vArray.getDouble(0);
                                 final double value = variableValue * scaleFactor;
                                 if (value != fillValue) {
