@@ -15,9 +15,21 @@ import javafx.beans.property.ObjectProperty;
  */
 public interface ApplicationChild<T extends Application> {
 
+    /**
+     * Gets the parent application.
+     * @return A {@code T} instance, may be {@code null}.
+     */
     T getApplication();
 
+    /**
+     * Sets the parent application.
+     * @param value The new value.
+     */
     void setApplication(final T value);
 
+    /**
+     * Gets the parent application property.
+     * @return An {@code ObjectProperty<T>} instance, never {@code null}.
+     */
     ObjectProperty<T> applicationProperty();
 }
