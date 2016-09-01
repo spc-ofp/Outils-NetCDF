@@ -22,7 +22,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -38,6 +37,7 @@ import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
+import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
@@ -49,7 +49,7 @@ import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
  * FXML Controller class
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public final class MainUIController implements Initializable {
+public final class MainUIController extends ControllerBase {
 
     @FXML
     private Node rootPane;
@@ -116,6 +116,7 @@ public final class MainUIController implements Initializable {
     
     @FXML void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
+        librariesPane.applicationProperty().bind(applicationProperty());
         final Dialog dialog = new Dialog();
         dialog.initOwner(rootPane.getScene().getWindow());
         dialog.setTitle(Main.I18N.getString("about.title")); // NOI18N.

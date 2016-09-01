@@ -39,6 +39,8 @@ public final class Main extends Application {
             final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, I18N);
             try {
                 final Node mainUI = fxmlLoader.load();
+                final MainUIController controller = fxmlLoader.getController();
+                controller.setApplication(this);
                 root.getChildren().add(mainUI);
             } catch (IOException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
