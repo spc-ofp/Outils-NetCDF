@@ -10,8 +10,10 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import org.spc.ofp.project.netcdfextractor.ApplicationChild;
 import org.spc.ofp.project.netcdfextractor.Disposable;
 import org.spc.ofp.project.netcdfextractor.Main;
 
@@ -41,6 +43,13 @@ public enum FXMLUtils {
                 fxmlLoader.setRoot(root);
                 fxmlLoader.load();
                 result = Optional.ofNullable(fxmlLoader.getController());
+                if (root instanceof ApplicationChild) {
+                    result.ifPresent(c -> {
+                        final ApplicationChild node = (ApplicationChild) root;
+                        final ApplicationChild controller = (ApplicationChild) c;
+                        controller.applicationProperty().bind(node.applicationProperty());
+                    });
+                }
             } catch (IOException ex) {
                 Logger.getLogger(FXMLUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
