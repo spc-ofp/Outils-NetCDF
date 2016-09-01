@@ -24,6 +24,8 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -36,6 +38,7 @@ import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
+import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
@@ -109,6 +112,16 @@ public final class MainUIController implements Initializable {
     @FXML
     private void handleExtractItem() {
         exportFiles();
+    }
+    
+    @FXML void handleAboutItem() {
+        final LibrariesPane librariesPane = new LibrariesPane();
+        final Dialog dialog = new Dialog();
+        dialog.initOwner(rootPane.getScene().getWindow());
+        dialog.setTitle(Main.I18N.getString("about.title")); // NOI18N.
+        dialog.getDialogPane().setContent(librariesPane);
+        dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CLOSE);
+        dialog.showAndWait();
     }
 
     private void browseForDirectory() {

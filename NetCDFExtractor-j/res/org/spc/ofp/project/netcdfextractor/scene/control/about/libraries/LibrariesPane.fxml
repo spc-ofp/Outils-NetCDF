@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright - Secretariat of the Pacific Community                   
+ Droit de copie - Secrétariat Général de la Communauté du Pacifique 
+ http://www.spc.int/                                                
+-->
+
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<fx:root id="StackPane" fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" type="StackPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPaneController">
+   <children>
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" />
+   </children>
+</fx:root>

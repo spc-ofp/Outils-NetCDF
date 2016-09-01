@@ -37,12 +37,13 @@
                 </Menu>
             <Menu mnemonicParsing="false" text="%menu.actions">
               <items>
-                <MenuItem mnemonicParsing="false" text="%menu.actions.extract" onAction="#handleExtractItem" />
+                <MenuItem mnemonicParsing="false" onAction="#handleExtractItem" text="%menu.actions.extract" />
               </items>
             </Menu>
                 <Menu mnemonicParsing="false" text="%menu.help">
-                    <items>
-                    </items>
+               <items>
+                  <MenuItem fx:id="aboutItem" mnemonicParsing="false" onAction="#handleAboutItem" text="%menu.help.about" />
+               </items>
                 </Menu>
             </menus>
         </MenuBar>
