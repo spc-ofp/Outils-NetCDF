@@ -69,6 +69,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return null;
             }
+//            System.out.printf("%d / %d%n", progress, totalProgress);
         }
         return null;
     }
@@ -102,17 +103,43 @@ public class BatchExtractToTxtTask extends Task<Void> {
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
             // Collect variables.
+            totalProgress += 3;
             final Variable[] variables = Arrays.stream(variableNames)
                     .map(netcdf::findVariable)
                     .filter(variable -> variable.getRank() == 3)
                     .toArray(Variable[]::new);
-            totalProgress += 1;
+            if (variables.length == 0) {
+                return;
+            }
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return;
             }
-            if (variables.length == 0) {
+            // Variable fill values.
+            final double[] fillValues = Arrays.stream(variables)
+                    .mapToDouble(variable -> {
+                        final Attribute attribute = variable.findAttribute("_FillValue"); // NOI18N.
+                        final double value = attribute.getNumericValue().doubleValue();
+                        return value;
+                    })
+                    .toArray();
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
+            // Variable scale factors.
+            final double[] scaleFactors = Arrays.stream(variables)
+                    .mapToDouble(variable -> {
+                        final Attribute attribute = variable.findAttribute("scale_factor"); // NOI18N.
+                        final double value = attribute.getNumericValue().doubleValue();
+                        return value;
+                    })
+                    .toArray();
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
                 return;
             }
             // Collect dimensions.
@@ -125,6 +152,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
+            // Dimension variables.
             final Variable[] dimensionVariables = Arrays.stream(dimensions)
                     .map(Dimension::getFullName)
                     .map(dimensionName -> netcdf.findVariable(dimensionName))
@@ -134,6 +162,7 @@ public class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
+            // Dimension sizes.
             final int[] sizes = Arrays.stream(dimensions)
                     .mapToInt(Dimension::getLength)
                     .toArray();
@@ -202,11 +231,10 @@ public class BatchExtractToTxtTask extends Task<Void> {
                             vIndex[0] = z;
                             vIndex[1] = y;
                             vIndex[2] = x;
-                            for (final Variable variable : variables) {
-                                final Attribute fillValueAttribute = variable.findAttribute("_FillValue"); // NOI18N.
-                                final double fillValue = fillValueAttribute.getNumericValue().doubleValue();
-                                final Attribute scaleFactorAttribute = variable.findAttribute("scale_factor"); // NOI18N.
-                                final double scaleFactor = scaleFactorAttribute.getNumericValue().doubleValue();
+                            for (int variableIndex = 0; variableIndex < variables.length; variableIndex++) {
+                                final Variable variable = variables[variableIndex];
+                                final double fillValue = fillValues[variableIndex];
+                                final double scaleFactor = scaleFactors[variableIndex];
                                 final Array vArray = variable.read(vIndex, vShape);
                                 final double variableValue = vArray.getDouble(0);
                                 final double value = variableValue * scaleFactor;
