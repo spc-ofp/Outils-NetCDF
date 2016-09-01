@@ -33,7 +33,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.stage.DirectoryChooser;
-import org.spc.ofp.project.netcdfextractor.cell.NetCDFTreeCell;
+import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;

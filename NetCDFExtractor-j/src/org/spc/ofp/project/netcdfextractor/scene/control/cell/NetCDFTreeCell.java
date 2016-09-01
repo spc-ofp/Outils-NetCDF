@@ -3,7 +3,7 @@
  *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
  *  http://www.spc.int/                                                *
  ***********************************************************************/
-package org.spc.ofp.project.netcdfextractor.cell;
+package org.spc.ofp.project.netcdfextractor.scene.control.cell;
 
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
