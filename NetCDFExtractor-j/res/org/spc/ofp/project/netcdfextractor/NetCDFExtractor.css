@@ -3,6 +3,15 @@
  *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
  *  http://www.spc.int/                                                *
  ***********************************************************************/
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('fontawesome-webfont.ttf');
+}
+.awesome-icon {
+    -fx-font-family: "FontAwesome";
+    -fx-font-size: 1.4em;
+    -fx-text-fill: derive(black, 35%);
+}
 .dir-hbox {
     -fx-padding: 3px;
     -fx-spacing: 3px;
