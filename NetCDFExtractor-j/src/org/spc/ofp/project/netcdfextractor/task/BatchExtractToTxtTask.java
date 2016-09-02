@@ -298,8 +298,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     case SHORT:
                                     case INT:
                                     case LONG: {
-                                        final double validMin = validMins[variableIndex].longValue();
-                                        final double validMax = validMaxs[variableIndex].longValue();
+                                        final long validMin = validMins[variableIndex].longValue();
+                                        final long validMax = validMaxs[variableIndex].longValue();
                                         final long fillValue = fillValues[variableIndex].longValue();
                                         final long scaleFactor = scaleFactors[variableIndex].longValue();
                                         final long addOffset = addOffsets[variableIndex].longValue();
