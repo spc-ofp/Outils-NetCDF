@@ -116,8 +116,9 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
+            ////////////////////////////////////////////////////////////////////
             // Collect variables.
-            totalProgress += 5;
+            totalProgress += 7;
             final Variable[] variables = Arrays.stream(variableNames)
                     .map(netcdf::findVariable)
                     .filter(variable -> variable.getRank() == 3 && SUPPORTED_DATA_TYPES.contains(variable.getDataType()))
@@ -134,6 +135,11 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final DataType[] dataTypes = Arrays.stream(variables)
                     .map(Variable::getDataType)
                     .toArray(DataType[]::new);
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
             // Variable fill values.
             final Number[] fillValues = Arrays.stream(variables)
                     .map(variable -> {
@@ -170,6 +176,31 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
+            // Variable valid mins.
+            final Number[] validMins = Arrays.stream(variables)
+                    .map(variable -> {
+                        final Attribute attribute = variable.findAttribute("valid_min"); // NOI18N.
+                        return attribute.getNumericValue();
+                    })
+                    .toArray(Number[]::new);
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
+            // Variable valid maxs.
+            final Number[] validMaxs = Arrays.stream(variables)
+                    .map(variable -> {
+                        final Attribute attribute = variable.findAttribute("valid_max"); // NOI18N.
+                        return attribute.getNumericValue();
+                    })
+                    .toArray(Number[]::new);
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
+            ////////////////////////////////////////////////////////////////////
             // Collect dimensions.
             totalProgress += 3;
             final Dimension[] dimensions = variables[0].getDimensions()
@@ -262,30 +293,33 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             for (int variableIndex = 0; variableIndex < variables.length; variableIndex++) {
                                 final Variable variable = variables[variableIndex];
                                 final DataType dataType = dataTypes[variableIndex];
+                                final Array vArray = variable.read(vIndex, vShape);
                                 switch (dataType) {
                                     case SHORT:
                                     case INT:
                                     case LONG: {
+                                        final double validMin = validMins[variableIndex].longValue();
+                                        final double validMax = validMaxs[variableIndex].longValue();
                                         final long fillValue = fillValues[variableIndex].longValue();
                                         final long scaleFactor = scaleFactors[variableIndex].longValue();
                                         final long addOffset = addOffsets[variableIndex].longValue();
-                                        final Array vArray = variable.read(vIndex, vShape);
                                         final long variableValue = vArray.getLong(0);
-                                        final long value = variableValue * scaleFactor + addOffset;
-                                        if (value != fillValue) {
+                                        if (variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
+                                            final long value = variableValue * scaleFactor + addOffset;
                                             line.append(value);
                                         }
                                     }
                                     break;
                                     case FLOAT:
                                     case DOUBLE: {
+                                        final double validMin = validMins[variableIndex].doubleValue();
+                                        final double validMax = validMaxs[variableIndex].doubleValue();
                                         final double fillValue = fillValues[variableIndex].doubleValue();
                                         final double scaleFactor = scaleFactors[variableIndex].doubleValue();
                                         final double addOffset = addOffsets[variableIndex].doubleValue();
-                                        final Array vArray = variable.read(vIndex, vShape);
                                         final double variableValue = vArray.getDouble(0);
-                                        final double value = variableValue * scaleFactor + addOffset;
-                                        if (value != fillValue) {
+                                        if (variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
+                                            final double value = variableValue * scaleFactor + addOffset;
                                             line.append(value);
                                         }
                                     }
