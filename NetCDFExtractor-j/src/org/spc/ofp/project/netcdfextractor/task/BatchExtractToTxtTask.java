@@ -15,10 +15,13 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import javafx.concurrent.Task;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -89,6 +92,17 @@ public final class BatchExtractToTxtTask extends Task<Void> {
         return destination;
     }
 
+    /**
+     * Set of supported data types for export.
+     */
+    private static final Set<DataType> SUPPORTED_DATA_TYPES = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+            DataType.SHORT,
+            DataType.INT,
+            DataType.LONG,
+            DataType.FLOAT,
+            DataType.DOUBLE
+    )));
+
     private long progress = 0;
     private long totalProgress = 100;
 
@@ -103,10 +117,10 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
             // Collect variables.
-            totalProgress += 3;
+            totalProgress += 5;
             final Variable[] variables = Arrays.stream(variableNames)
                     .map(netcdf::findVariable)
-                    .filter(variable -> variable.getRank() == 3)
+                    .filter(variable -> variable.getRank() == 3 && SUPPORTED_DATA_TYPES.contains(variable.getDataType()))
                     .toArray(Variable[]::new);
             if (variables.length == 0) {
                 return;
@@ -116,27 +130,41 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
+            // Variable type.
+            final DataType[] dataTypes = Arrays.stream(variables)
+                    .map(Variable::getDataType)
+                    .toArray(DataType[]::new);
             // Variable fill values.
-            final double[] fillValues = Arrays.stream(variables)
-                    .mapToDouble(variable -> {
+            final Number[] fillValues = Arrays.stream(variables)
+                    .map(variable -> {
                         final Attribute attribute = variable.findAttribute("_FillValue"); // NOI18N.
-                        final double value = attribute.getNumericValue().doubleValue();
-                        return value;
+                        return attribute.getNumericValue();
                     })
-                    .toArray();
+                    .toArray(Number[]::new);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return;
             }
             // Variable scale factors.
-            final double[] scaleFactors = Arrays.stream(variables)
-                    .mapToDouble(variable -> {
+            final Number[] scaleFactors = Arrays.stream(variables)
+                    .map(variable -> {
                         final Attribute attribute = variable.findAttribute("scale_factor"); // NOI18N.
-                        final double value = attribute.getNumericValue().doubleValue();
-                        return value;
+                        return attribute.getNumericValue();
                     })
-                    .toArray();
+                    .toArray(Number[]::new);
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
+            // Variable add offets.
+            final Number[] addOffsets = Arrays.stream(variables)
+                    .map(variable -> {
+                        final Attribute attribute = variable.findAttribute("add_offset"); // NOI18N.
+                        return attribute.getNumericValue();
+                    })
+                    .toArray(Number[]::new);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
@@ -233,13 +261,35 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             vIndex[2] = x;
                             for (int variableIndex = 0; variableIndex < variables.length; variableIndex++) {
                                 final Variable variable = variables[variableIndex];
-                                final double fillValue = fillValues[variableIndex];
-                                final double scaleFactor = scaleFactors[variableIndex];
-                                final Array vArray = variable.read(vIndex, vShape);
-                                final double variableValue = vArray.getDouble(0);
-                                final double value = variableValue * scaleFactor;
-                                if (value != fillValue) {
-                                    line.append(value);
+                                final DataType dataType = dataTypes[variableIndex];
+                                switch (dataType) {
+                                    case SHORT:
+                                    case INT:
+                                    case LONG: {
+                                        final long fillValue = fillValues[variableIndex].longValue();
+                                        final long scaleFactor = scaleFactors[variableIndex].longValue();
+                                        final long addOffset = addOffsets[variableIndex].longValue();
+                                        final Array vArray = variable.read(vIndex, vShape);
+                                        final long variableValue = vArray.getLong(0);
+                                        final long value = variableValue * scaleFactor + addOffset;
+                                        if (value != fillValue) {
+                                            line.append(value);
+                                        }
+                                    }
+                                    break;
+                                    case FLOAT:
+                                    case DOUBLE: {
+                                        final double fillValue = fillValues[variableIndex].doubleValue();
+                                        final double scaleFactor = scaleFactors[variableIndex].doubleValue();
+                                        final double addOffset = addOffsets[variableIndex].doubleValue();
+                                        final Array vArray = variable.read(vIndex, vShape);
+                                        final double variableValue = vArray.getDouble(0);
+                                        final double value = variableValue * scaleFactor + addOffset;
+                                        if (value != fillValue) {
+                                            line.append(value);
+                                        }
+                                    }
+                                    break;
                                 }
                                 line.append(separator);
                                 progress++;
