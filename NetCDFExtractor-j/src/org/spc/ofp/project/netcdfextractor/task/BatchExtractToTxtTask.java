@@ -176,25 +176,21 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
-            // Variable valid mins.
-            final Number[] validMins = Arrays.stream(variables)
+            // Variable valid ranges.
+            final Pair<Number, Number>[] validRanges = Arrays.stream(variables)
                     .map(variable -> {
-                        final Attribute attribute = variable.findAttribute("valid_min"); // NOI18N.
-                        return attribute.getNumericValue();
+                        final Attribute validMinAttribute = variable.findAttribute("valid_min"); // NOI18N.
+                        final Attribute validMaxAttribute = variable.findAttribute("valid_max"); // NOI18N.
+                        final Attribute validRangeAttribute = variable.findAttribute("valid_range"); // NOI18N.
+                        Pair<Number, Number> result = null;
+                        if (validMinAttribute == null) {
+                            result = new Pair<>(validRangeAttribute.getNumericValue(0), validRangeAttribute.getNumericValue(1));
+                        } else {
+                            result = new Pair<>(validMinAttribute.getNumericValue(), validMaxAttribute.getNumericValue());
+                        }
+                        return result;
                     })
-                    .toArray(Number[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
-            if (isCancelled()) {
-                return;
-            }
-            // Variable valid maxs.
-            final Number[] validMaxs = Arrays.stream(variables)
-                    .map(variable -> {
-                        final Attribute attribute = variable.findAttribute("valid_max"); // NOI18N.
-                        return attribute.getNumericValue();
-                    })
-                    .toArray(Number[]::new);
+                    .toArray(Pair[]::new);
             progress++;
             updateProgress(progress, totalProgress);
             if (isCancelled()) {
@@ -298,8 +294,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     case SHORT:
                                     case INT:
                                     case LONG: {
-                                        final long validMin = validMins[variableIndex].longValue();
-                                        final long validMax = validMaxs[variableIndex].longValue();
+                                        final long validMin = validRanges[variableIndex].getKey().longValue();
+                                        final long validMax = validRanges[variableIndex].getValue().longValue();
                                         final long fillValue = fillValues[variableIndex].longValue();
                                         final long scaleFactor = scaleFactors[variableIndex].longValue();
                                         final long addOffset = addOffsets[variableIndex].longValue();
@@ -312,8 +308,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     break;
                                     case FLOAT:
                                     case DOUBLE: {
-                                        final double validMin = validMins[variableIndex].doubleValue();
-                                        final double validMax = validMaxs[variableIndex].doubleValue();
+                                        final double validMin = validRanges[variableIndex].getKey().doubleValue();
+                                        final double validMax = validRanges[variableIndex].getValue().doubleValue();
                                         final double fillValue = fillValues[variableIndex].doubleValue();
                                         final double scaleFactor = scaleFactors[variableIndex].doubleValue();
                                         final double addOffset = addOffsets[variableIndex].doubleValue();
