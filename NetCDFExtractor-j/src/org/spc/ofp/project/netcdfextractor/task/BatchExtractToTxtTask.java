@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javafx.concurrent.Task;
@@ -95,7 +95,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     /**
      * Set of supported data types for export.
      */
-    private static final Set<DataType> SUPPORTED_DATA_TYPES = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+    private static final Set<DataType> SUPPORTED_DATA_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             DataType.SHORT,
             DataType.INT,
             DataType.LONG,
