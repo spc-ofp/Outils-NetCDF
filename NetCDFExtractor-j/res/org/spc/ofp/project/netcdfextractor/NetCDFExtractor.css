@@ -17,6 +17,17 @@
     -fx-spacing: 3px;
     -fx-alignment: baseline-left;
 }
+.task-progress-pane {
+    -fx-padding: 3px;
+    -fx-hgap: 3px;
+    -fx-vgap: 3px;
+}
+.task-progress-pane .title {
+    -fx-font-weight: bold;
+}
+.task-progress-pane .message {
+    -fx-opacity: 0.5;
+}
 .netcdf-cell {    
 }
 .netcdf-cell:file {
