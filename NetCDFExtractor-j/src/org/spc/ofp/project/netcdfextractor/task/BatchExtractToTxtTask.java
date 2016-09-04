@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javafx.concurrent.Task;
+import javafx.util.Pair;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -52,7 +53,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         final Set<Path> files = parameters.getFiles();
-        totalProgress = 2 * files.size();
+        totalFiles = files.size();
         // Export files.
         for (final Path file : files) {
             // Settings.
@@ -60,18 +61,15 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final String separator = settings.getSeparator();
             final Path output = settings.getDestination();
             final String[] variables = settings.getVariables().toArray(new String[0]);
-            progress++;
-            updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return null;
             }
             // Export.
             exportFile(file, output, separator, variables);
-            progress++;
-            updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return null;
             }
+            currentFile++;
 //            System.out.printf("%d / %d%n", progress, totalProgress);
             if (parameters.isForceGarbageCollection()) {
                 System.gc();
@@ -109,6 +107,9 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     private long progress = 0;
     private long totalProgress = 100;
 
+    private int currentFile = 0;
+    private int totalFiles = 0;
+
     /**
      * Export a given file.
      * @param source The source file.
@@ -119,22 +120,49 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
+            final String title = String.format("%s %d/%d", source.getFileName().toString(), currentFile + 1, totalFiles);
+            updateTitle(title);
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
-            totalProgress += 7;
+            updateMessage("Collecting variables."); // NOI18N.
             final Variable[] variables = Arrays.stream(variableNames)
                     .map(netcdf::findVariable)
                     .filter(variable -> variable.getRank() == 3 && SUPPORTED_DATA_TYPES.contains(variable.getDataType()))
                     .toArray(Variable[]::new);
+            // Nothing to do.
             if (variables.length == 0) {
                 return;
             }
-            progress++;
-            updateProgress(progress, totalProgress);
             if (isCancelled()) {
                 return;
             }
-            // Variable type.
+            ////////////////////////////////////////////////////////////////////
+            // Collect dimensions.
+            updateMessage("Collecting dimension."); // NOI18N.
+            final Dimension[] dimensions = variables[0].getDimensions()
+                    .stream()
+                    .toArray(Dimension[]::new);
+            if (isCancelled()) {
+                return;
+            }
+            // Dimension sizes.
+            updateMessage("Collecting dimension sizes."); // NOI18N.
+            final int[] sizes = Arrays.stream(dimensions)
+                    .mapToInt(Dimension::getLength)
+                    .toArray();
+            if (isCancelled()) {
+                return;
+            }
+            ////////////////////////////////////////////////////////////////////
+            // Now compute total extraction length.
+            // 6 preliminary steps.
+            // 1 header to write
+            // Each file row is (numDims + numVars + 1 row to write)
+            final int totalRows = sizes[0] * sizes[1] * sizes[2];
+            totalProgress = 6 + 1 + (dimensions.length + variables.length + 1) * totalRows;
+            ////////////////////////////////////////////////////////////////////
+            // Variable data type.
+            updateMessage("Collecting variables data types."); // NOI18N.
             final DataType[] dataTypes = Arrays.stream(variables)
                     .map(Variable::getDataType)
                     .toArray(DataType[]::new);
@@ -144,6 +172,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable fill values.
+            updateMessage("Collecting variables fill values."); // NOI18N.
             final Number[] fillValues = Arrays.stream(variables)
                     .map(variable -> {
                         final Attribute attribute = variable.findAttribute("_FillValue"); // NOI18N.
@@ -156,6 +185,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable scale factors.
+            updateMessage("Collecting variables scale factors."); // NOI18N.
             final Number[] scaleFactors = Arrays.stream(variables)
                     .map(variable -> {
                         final Attribute attribute = variable.findAttribute("scale_factor"); // NOI18N.
@@ -168,6 +198,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable add offets.
+            updateMessage("Collecting variables add offsets."); // NOI18N.
             final Number[] addOffsets = Arrays.stream(variables)
                     .map(variable -> {
                         final Attribute attribute = variable.findAttribute("add_offset"); // NOI18N.
@@ -180,6 +211,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable valid ranges.
+            updateMessage("Collecting variables valid ranges."); // NOI18N.
             final Pair<Number, Number>[] validRanges = Arrays.stream(variables)
                     .map(variable -> {
                         final Attribute validMinAttribute = variable.findAttribute("valid_min"); // NOI18N.
@@ -199,18 +231,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
-            ////////////////////////////////////////////////////////////////////
-            // Collect dimensions.
-            totalProgress += 3;
-            final Dimension[] dimensions = variables[0].getDimensions()
-                    .stream()
-                    .toArray(Dimension[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
-            if (isCancelled()) {
-                return;
-            }
             // Dimension variables.
+            updateMessage("Collecting dimensions variables."); // NOI18N.
             final Variable[] dimensionVariables = Arrays.stream(dimensions)
                     .map(Dimension::getFullName)
                     .map(dimensionName -> netcdf.findVariable(dimensionName))
@@ -220,17 +242,9 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             if (isCancelled()) {
                 return;
             }
-            // Dimension sizes.
-            final int[] sizes = Arrays.stream(dimensions)
-                    .mapToInt(Dimension::getLength)
-                    .toArray();
-            progress++;
-            updateProgress(progress, totalProgress);
-            if (isCancelled()) {
-                return;
-            }
-            //
-            totalProgress += 1 + (dimensions.length + variables.length + 1) * sizes[0] * sizes[1] * sizes[2];
+            ////////////////////////////////////////////////////////////////////
+            // Extract.
+            int currentRow = 0;
             try (final BufferedWriter writer = Files.newBufferedWriter(destination);
                     final PrintWriter out = new PrintWriter(writer)) {
                 // Write header.
@@ -258,6 +272,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                         for (int x = 0; x < sizes[2]; x++) {
                             xIndex[0] = x;
                             final Array xArray = dimensionVariables[2].read(xIndex, xShape);
+                            //
+                            updateMessage(String.format("Row %d/%d", currentRow + 1, totalRows)); // NOI18N.
                             // Time.
                             final long time = zArray.getLong(0);
                             final ZonedDateTime utc = Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC);
@@ -339,6 +355,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             if (isCancelled()) {
                                 return;
                             }
+                            currentRow++;
                         }
                     }
                 }
