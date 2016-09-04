@@ -44,7 +44,7 @@ public final class TaskProgressMonitor extends GridPane implements Disposable {
         return worker.get();
     }
 
-    public void setWorker(Worker value) {
+    public void setWorker(final Worker value) {
         worker.set(value);
     }
 
