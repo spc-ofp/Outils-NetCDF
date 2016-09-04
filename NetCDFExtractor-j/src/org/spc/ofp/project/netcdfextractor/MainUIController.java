@@ -33,6 +33,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
@@ -58,7 +59,11 @@ public final class MainUIController extends ControllerBase {
     @FXML
     private Tooltip dirFieldTip;
     @FXML
-    private ProgressBar progressBar;
+    private ProgressBar taskProgressBar;
+    @FXML
+    private Text taskTitleText;
+    @FXML
+    private Text taskMessageText;
     @FXML
     private TreeView treeView;
     @FXML
@@ -213,8 +218,8 @@ public final class MainUIController extends ControllerBase {
      * Called at the end of the files load service.
      */
     private void cleanupLoadFiles() {
-        progressBar.progressProperty().unbind();
-        progressBar.setProgress(0);
+        taskProgressBar.progressProperty().unbind();
+        taskProgressBar.setProgress(0);
         loadFilesServiceOptional = Optional.empty();
     }
 
@@ -240,7 +245,7 @@ public final class MainUIController extends ControllerBase {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             cleanupLoadFiles();
         });
-        progressBar.progressProperty().bind(service.progressProperty());
+        taskProgressBar.progressProperty().bind(service.progressProperty());
         loadFilesServiceOptional = Optional.of(service);
         service.start();
     }
@@ -349,7 +354,9 @@ public final class MainUIController extends ControllerBase {
             exportServices.remove(service);
         });
         exportServices.add(service);
-        progressBar.progressProperty().bind(service.progressProperty());
+        taskTitleText.textProperty().bind(service.titleProperty());
+        taskProgressBar.progressProperty().bind(service.progressProperty());
+        taskMessageText.textProperty().bind(service.messageProperty());
         service.start();
     }
 }
