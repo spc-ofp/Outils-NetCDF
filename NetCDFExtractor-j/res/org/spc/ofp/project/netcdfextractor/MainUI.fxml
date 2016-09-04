@@ -10,7 +10,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
@@ -19,14 +18,9 @@
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
 
 <BorderPane id="rootPane" fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.MainUIController">
     <top>
@@ -88,26 +82,5 @@
         </StackPane>
     </center>
    <bottom>
-      <GridPane styleClass="task-progress-pane" BorderPane.alignment="CENTER">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <TextFlow GridPane.columnSpan="2147483647">
-               <children>
-                  <Text id="message" fx:id="taskTitleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Text" />
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" - " />
-                  <Text fx:id="taskMessageText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="message" text="Text" />
-               </children>
-            </TextFlow>
-              <ProgressBar id="progressBar" fx:id="taskProgressBar" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.rowIndex="1" />
-            <Button fx:id="stopTaskButton" mnemonicParsing="false" text="Button" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1" />
-         </children>
-      </GridPane>
    </bottom>
 </BorderPane>

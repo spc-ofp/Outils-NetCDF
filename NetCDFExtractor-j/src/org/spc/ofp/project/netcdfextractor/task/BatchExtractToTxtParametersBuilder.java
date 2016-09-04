@@ -52,7 +52,7 @@ public final class BatchExtractToTxtParametersBuilder {
     public static BatchExtractToTxtParametersBuilder create() {
         return new BatchExtractToTxtParametersBuilder();
     }
-    
+
     /**
      * Sets the force garbage collection flag.
      * @param value The new value.
@@ -61,7 +61,7 @@ public final class BatchExtractToTxtParametersBuilder {
     public BatchExtractToTxtParametersBuilder forceGarbageCollection(final boolean value) {
         delegated.forceGarbageCollection = value;
         return this;
-    }    
+    }
 
     /**
      * Sets the separator.

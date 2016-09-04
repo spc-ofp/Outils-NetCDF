@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright - Secretariat of the Pacific Community                   
+ Droit de copie - Secrétariat Général de la Communauté du Pacifique 
+ http://www.spc.int/                                                
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+
+<fx:root id="GridPane" prefWidth="400.0" styleClass="task-progress-pane" stylesheets="@TaskProgressMonitor.css" type="GridPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitorController">
+        <columnConstraints>
+          <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="NEVER" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints vgrow="NEVER" />
+          <RowConstraints valignment="CENTER" vgrow="NEVER" />
+        </rowConstraints>
+         <children>
+            <TextFlow GridPane.columnSpan="2147483647">
+               <children>
+                  <Text id="message" fx:id="taskTitleText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Text" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" - " />
+                  <Text fx:id="taskMessageText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="message" text="Text" />
+               </children>
+            </TextFlow>
+              <ProgressBar id="progressBar" fx:id="taskProgressBar" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.rowIndex="1" />
+            <Button fx:id="stopTaskButton" mnemonicParsing="false" onAction="#handleStopButton" text="%task.cancel.label" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1">
+               <tooltip>
+                  <Tooltip fx:id="stopTaskTip" text="%task.cancel.tip" />
+               </tooltip></Button>
+         </children>    
+</fx:root>

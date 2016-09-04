@@ -1,0 +1,19 @@
+.task-progress-pane {
+    -fx-padding: 3px;
+    -fx-hgap: 3px;
+    -fx-vgap: 3px;
+}
+.task-progress-pane .title {
+    -fx-font-weight: bold;
+}
+.task-progress-pane .message {
+    -fx-opacity: 0.5;
+}
+.task-progress-pane .button {
+    -fx-padding: 10px 20px 10px 20px;
+    -fx-base: red;
+    -fx-font-size: 1.42em;
+    -fx-font-weight: bold;
+}
+
+

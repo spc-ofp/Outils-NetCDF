@@ -22,10 +22,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -33,13 +31,14 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.text.Text;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
+import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitor;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
@@ -53,21 +52,17 @@ import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
 public final class MainUIController extends ControllerBase {
 
     @FXML
-    private Node rootPane;
+    private BorderPane rootPane;
     @FXML
     private TextField dirField;
     @FXML
     private Tooltip dirFieldTip;
     @FXML
-    private ProgressBar taskProgressBar;
-    @FXML
-    private Text taskTitleText;
-    @FXML
-    private Text taskMessageText;
-    @FXML
     private TreeView treeView;
     @FXML
     private ImageView imageView;
+
+    private TaskProgressMonitor taskProgressMonitor;
 
     /**
      * Creates a new instance.
@@ -86,6 +81,9 @@ public final class MainUIController extends ControllerBase {
         //
         treeView.getSelectionModel().selectedItemProperty().addListener(selectedTreeItemInvalidationListener);
         treeView.setCellFactory(treeView -> new NetCDFTreeCell());
+        //
+        taskProgressMonitor = new TaskProgressMonitor();
+        rootPane.setBottom(taskProgressMonitor);
         //
         Platform.runLater(() -> {
             final File dir = new File(path);
@@ -118,8 +116,9 @@ public final class MainUIController extends ControllerBase {
     private void handleExtractItem() {
         exportFiles();
     }
-    
-    @FXML void handleAboutItem() {
+
+    @FXML
+    void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
         librariesPane.applicationProperty().bind(applicationProperty());
         final Dialog dialog = new Dialog();
@@ -218,8 +217,6 @@ public final class MainUIController extends ControllerBase {
      * Called at the end of the files load service.
      */
     private void cleanupLoadFiles() {
-        taskProgressBar.progressProperty().unbind();
-        taskProgressBar.setProgress(0);
         loadFilesServiceOptional = Optional.empty();
     }
 
@@ -245,7 +242,6 @@ public final class MainUIController extends ControllerBase {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             cleanupLoadFiles();
         });
-        taskProgressBar.progressProperty().bind(service.progressProperty());
         loadFilesServiceOptional = Optional.of(service);
         service.start();
     }
@@ -354,9 +350,7 @@ public final class MainUIController extends ControllerBase {
             exportServices.remove(service);
         });
         exportServices.add(service);
-        taskTitleText.textProperty().bind(service.titleProperty());
-        taskProgressBar.progressProperty().bind(service.progressProperty());
-        taskMessageText.textProperty().bind(service.messageProperty());
+        taskProgressMonitor.setWorker(service);
         service.start();
     }
 }
