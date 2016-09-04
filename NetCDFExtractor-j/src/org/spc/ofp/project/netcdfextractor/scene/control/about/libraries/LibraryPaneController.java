@@ -26,7 +26,7 @@ import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
  * FXML controller class
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public final class LibraryPaneController extends ControllerBase {
+public final class LibraryPaneController extends ControllerBase<LibraryPane> {
 
     @FXML
     private Text titleText;

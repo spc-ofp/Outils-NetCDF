@@ -7,6 +7,7 @@ package org.spc.ofp.project.netcdfextractor.scene;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,9 +34,11 @@ public enum FXMLUtils {
      * @param <N> The type of the FXML root.
      * @param fxmlURL The URL to the FXML file.
      * @param root The node.
-     * @return 
+     * @return An {@code Optional<T>} instance, never {@code null}.
+     * @throws NullPointerException If ({@code root} is {@code null}.
      */
-    public <T, N extends Node> Optional<T> loadAndInject(final URL fxmlURL, N root) {
+    public <T, N extends Node> Optional<T> loadAndInject(final URL fxmlURL, N root) throws NullPointerException {
+        Objects.requireNonNull(root);
         Optional<T> result = Optional.empty();
         if (fxmlURL != null) {
             try {
@@ -43,13 +46,17 @@ public enum FXMLUtils {
                 fxmlLoader.setRoot(root);
                 fxmlLoader.load();
                 result = Optional.ofNullable(fxmlLoader.getController());
-                if (root instanceof ApplicationChild) {
-                    result.ifPresent(c -> {
+                result.ifPresent(c -> {
+                    if (root instanceof ApplicationChild && c instanceof ApplicationChild) {
                         final ApplicationChild node = (ApplicationChild) root;
                         final ApplicationChild controller = (ApplicationChild) c;
                         controller.applicationProperty().bind(node.applicationProperty());
-                    });
-                }
+                    }
+                    if (c instanceof ControllerBase) {
+                        final ControllerBase controller = (ControllerBase) c;
+                        controller.setNode(root);
+                    }
+                });
             } catch (IOException ex) {
                 Logger.getLogger(FXMLUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
