@@ -73,6 +73,9 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return null;
             }
 //            System.out.printf("%d / %d%n", progress, totalProgress);
+            if (parameters.isForceGarbageCollection()) {
+                System.gc();
+            }
         }
         return null;
     }
@@ -341,7 +344,6 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 }
             }
         }
-        System.gc();
     }
 
     /**
