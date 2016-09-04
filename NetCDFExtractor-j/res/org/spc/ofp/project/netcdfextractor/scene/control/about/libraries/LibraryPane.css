@@ -24,4 +24,5 @@
 .pane .license-area {
     -fx-wrap-text: true;
     -fx-font-family: "Monospace";
+    -fx-text-alignment: justify;
 }
