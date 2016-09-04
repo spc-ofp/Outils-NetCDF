@@ -18,6 +18,12 @@ import java.util.Set;
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class BatchExtractToTxtParameters {
+    
+    boolean forceGarbageCollection = true;
+    
+    public boolean isForceGarbageCollection() {
+        return forceGarbageCollection;
+    }
 
     /**
      * Extraction settings for a given file.

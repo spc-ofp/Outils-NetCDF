@@ -31,6 +31,7 @@ public final class BatchExtractToTxtParametersBuilder {
      */
     public BatchExtractToTxtParameters build() {
         final BatchExtractToTxtParameters copy = new BatchExtractToTxtParameters();
+        copy.forceGarbageCollection = delegated.forceGarbageCollection;
         delegated.files
                 .entrySet()
                 .forEach(entry -> {
@@ -51,6 +52,16 @@ public final class BatchExtractToTxtParametersBuilder {
     public static BatchExtractToTxtParametersBuilder create() {
         return new BatchExtractToTxtParametersBuilder();
     }
+    
+    /**
+     * Sets the force garbage collection flag.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder forceGarbageCollection(final boolean value) {
+        delegated.forceGarbageCollection = value;
+        return this;
+    }    
 
     /**
      * Sets the separator.
