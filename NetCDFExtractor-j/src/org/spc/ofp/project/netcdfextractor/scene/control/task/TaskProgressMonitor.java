@@ -35,6 +35,9 @@ public final class TaskProgressMonitor extends GridPane implements Disposable {
         FXMLUtils.INSTANCE.disposeController(controller);
     }
 
+    /**
+     * The worker that is being monitored.
+     */
     private final ObjectProperty<Worker> worker = new SimpleObjectProperty<>(this, "worker"); // NOI18N.
 
     public Worker getWorker() {
