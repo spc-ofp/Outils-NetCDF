@@ -3,30 +3,30 @@
  *  Droit de copie - Communauté du Pacifique *
  *  http://www.spc.int/                      *
  *********************************************/
-.pane {
+.library-pane{
     -fx-padding: 3px;
     -fx-spacing: 3px;
 }
-.pane .name {
+.library-pane.name {
     -fx-font-weight: bold;
     -fx-font-size: 1.2em;
 }
-.pane .version {
+.library-pane .version {
     -fx-font-size: 1.2em;
     -fx-opacity: 0.66;
 }
-.pane .owner {
+.library-pane .owner {
     -fx-font-style: italic;
 }
-.pane .home,
-.pane .home:focused {
+.library-pane .home,
+.library-pane .home:focused {
     -fx-border-color: null;
     -fx-border-width: 0px;
 }
-.pane .license {
+.library-pane .license {
     -fx-font-weight: bold;
 }
-.pane .license-area {
+.library-pane .license-area {
     -fx-wrap-text: true;
     -fx-font-family: "Monospace";
     -fx-text-alignment: justify;
