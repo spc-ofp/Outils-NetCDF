@@ -129,6 +129,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
             final String title = String.format("%s %d/%d", source.getFileName().toString(), currentFile + 1, totalFiles);
             updateTitle(title);
+            final boolean includeColumnHeader = parameters.isIncludeColumnHeader();
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
             updateMessage("Collecting variables."); // NOI18N.
@@ -163,10 +164,14 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             ////////////////////////////////////////////////////////////////////
             // Now compute total extraction length.
             // 6 preliminary steps.
-            // 1 header to write
-            // Each file row is (numDims + numVars + 1 row to write)
             final int totalRows = sizes[0] * sizes[1] * sizes[2];
-            totalProgress = 6 + 1 + (dimensions.length + variables.length + 1) * totalRows;
+            totalProgress = 6;
+            // 1 header to write
+            if (includeColumnHeader) {
+                totalProgress += 1;
+            }
+            // Each file row is (numDims + numVars + 1 row to write)
+            totalProgress += (dimensions.length + variables.length + 1) * totalRows;
             ////////////////////////////////////////////////////////////////////
             // Variable data type.
             updateMessage("Collecting variables data types."); // NOI18N.
@@ -255,11 +260,13 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             try (final BufferedWriter writer = Files.newBufferedWriter(destination);
                     final PrintWriter out = new PrintWriter(writer)) {
                 // Write header.
-                writeHeader(out, separator, dimensions, variables);
-                progress++;
-                updateProgress(progress, totalProgress);
-                if (isCancelled()) {
-                    return;
+                if (includeColumnHeader) {
+                    writeHeader(out, separator, dimensions, variables);
+                    progress++;
+                    updateProgress(progress, totalProgress);
+                    if (isCancelled()) {
+                        return;
+                    }
                 }
                 // Extraction.
                 final int[] zIndex = {0};

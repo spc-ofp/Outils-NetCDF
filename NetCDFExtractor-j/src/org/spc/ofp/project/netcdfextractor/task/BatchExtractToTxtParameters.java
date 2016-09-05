@@ -33,6 +33,12 @@ public final class BatchExtractToTxtParameters {
         return singleDocument;
     }
 
+    boolean includeColumnHeader = false;
+
+    public boolean isIncludeColumnHeader() {
+        return includeColumnHeader;
+    }
+
     /**
      * The default separator, is equal to {@value}.    
      */

@@ -18,6 +18,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -50,6 +51,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     private ComboBox<String> separatorCombo;
     @FXML
     private TextField separatorField;
+    @FXML
+    private CheckBox singleOutputCheck;
+    @FXML
+    private CheckBox includeColumnHeaderCheck;
 
     /**
      * Creates a new instance.
@@ -70,6 +75,14 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             }
             if (separatorCombo != null) {
                 separatorCombo.valueProperty().removeListener(separatorChangeListener);
+            }
+            if (singleOutputCheck != null) {
+                singleOutputCheck.selectedProperty().removeListener(singleOuputChangeListener);
+                singleOutputCheck = null;
+            }
+            if (includeColumnHeaderCheck != null) {
+                includeColumnHeaderCheck.selectedProperty().removeListener(includeColumnHeaderChangeListener);
+                includeColumnHeaderCheck = null;
             }
         } finally {
             super.dispose();
@@ -101,6 +114,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         separatorCombo.getItems().setAll(DEFAULT_SEPARATORS);
         separatorCombo.getSelectionModel().select(BatchExtractToTxtParameters.DEFAULT_SEPARATOR);
         separatorCombo.valueProperty().addListener(separatorChangeListener);
+        //
+        singleOutputCheck.selectedProperty().addListener(singleOuputChangeListener);
+        //
+        includeColumnHeaderCheck.selectedProperty().addListener(includeColumnHeaderChangeListener);
     }
 
     @Override
@@ -142,6 +159,22 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         final String separator = (CUSTOM_SEPARATOR.equals(comboSeparator)) ? fieldSeparator : comboSeparator;
         final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
         builder.separator(separator);
+    };
+
+    /**
+     * Called whenever the single output checkbox changes state.
+     */
+    private final ChangeListener<Boolean> singleOuputChangeListener = (observable, oldValue, newValue) -> {
+        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
+        builder.singleDocument(newValue);
+    };
+
+    /**
+     * Called whenever the include column header checkbox changes state.
+     */
+    private final ChangeListener<Boolean> includeColumnHeaderChangeListener = (observable, oldValue, newValue) -> {
+        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
+        builder.includeColumnHeader(newValue);
     };
 
 }

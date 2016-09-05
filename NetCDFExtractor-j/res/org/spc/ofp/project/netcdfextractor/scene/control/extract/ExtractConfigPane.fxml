@@ -22,6 +22,7 @@
       <RowConstraints vgrow="NEVER" />
       <RowConstraints vgrow="NEVER" />
       <RowConstraints vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
    </rowConstraints>
    <columnConstraints>
       <ColumnConstraints hgrow="NEVER" />
@@ -42,7 +43,8 @@
       </Button>
       <Label fx:id="separatorLabel" text="%extract.separator.label" GridPane.rowIndex="1" />
       <ComboBox fx:id="separatorCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
-      <TextField fx:id="separatorField" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+      <TextField fx:id="separatorField" promptText="%extract.separator.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
       <CheckBox fx:id="singleOutputCheck" mnemonicParsing="false" text="%extract.single-output.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+      <CheckBox fx:id="includeColumnHeaderCheck" mnemonicParsing="false" text="%extract.include-column-header.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
    </children>
 </fx:root>

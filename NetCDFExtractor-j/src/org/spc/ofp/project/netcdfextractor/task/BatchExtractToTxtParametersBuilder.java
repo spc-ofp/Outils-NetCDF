@@ -33,6 +33,7 @@ public final class BatchExtractToTxtParametersBuilder {
         final BatchExtractToTxtParameters copy = new BatchExtractToTxtParameters();
         copy.forceGarbageCollection = delegated.forceGarbageCollection;
         copy.singleDocument = delegated.singleDocument;
+        copy.includeColumnHeader = delegated.includeColumnHeader;
         copy.destinationDir = delegated.destinationDir;
         copy.separator = delegated.separator;
         delegated.files
@@ -66,6 +67,11 @@ public final class BatchExtractToTxtParametersBuilder {
 
     public BatchExtractToTxtParametersBuilder singleDocument(final boolean value) {
         delegated.singleDocument = value;
+        return this;
+    }
+
+    public BatchExtractToTxtParametersBuilder includeColumnHeader(final boolean value) {
+        delegated.includeColumnHeader = value;
         return this;
     }
 
