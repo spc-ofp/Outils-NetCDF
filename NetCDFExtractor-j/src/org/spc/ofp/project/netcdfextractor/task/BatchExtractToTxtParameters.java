@@ -6,8 +6,10 @@
 package org.spc.ofp.project.netcdfextractor.task;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +20,38 @@ import java.util.Set;
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class BatchExtractToTxtParameters {
-    
+
     boolean forceGarbageCollection = true;
-    
+
     public boolean isForceGarbageCollection() {
         return forceGarbageCollection;
+    }
+
+    boolean singleDocument = false;
+
+    public boolean isSingleDocument() {
+        return singleDocument;
+    }
+
+    /**
+     * The default separator, is equal to {@value}.    
+     */
+    public static final String DEFAULT_SEPARATOR = ","; // NOI18N.
+
+    Path destinationDir = null;
+
+    public Path getDestinationDir() {
+        return destinationDir;
+    }
+
+    String separator = DEFAULT_SEPARATOR;
+
+    /**
+     * Gets the column separator.
+     * @return A {@code String} instance, never {@code null}.
+     */
+    public String getSeparator() {
+        return separator;
     }
 
     /**
@@ -40,26 +69,6 @@ public final class BatchExtractToTxtParameters {
          */
         public List<String> getVariables() {
             return variablesUnmodifiable;
-        }
-
-        Path destination;
-
-        /**
-         * Gets the destination file.
-         * @return A {@code Path} instance, may be {@code null} if not initialized.
-         */
-        public Path getDestination() {
-            return destination;
-        }
-
-        String separator = ","; // NOI18N.
-
-        /**
-         * Gets the column separator.
-         * @return A {@code String} instance, never {@code null}.
-         */
-        public String getSeparator() {
-            return separator;
         }
     }
 

@@ -53,13 +53,14 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         final Set<Path> files = parameters.getFiles();
+        final String separator = parameters.getSeparator();
+        final Path destinationDir = parameters.getDestinationDir();
         totalFiles = files.size();
         // Export files.
         for (final Path file : files) {
             // Settings.
             final BatchExtractToTxtParameters.Settings settings = parameters.getSettings(file);
-            final String separator = settings.getSeparator();
-            final Path output = settings.getDestination();
+            final Path output = createDestination(file, destinationDir);
             final String[] variables = settings.getVariables().toArray(new String[0]);
             if (isCancelled()) {
                 return null;
@@ -79,18 +80,6 @@ public final class BatchExtractToTxtTask extends Task<Void> {
     }
 
     /**
-     * Generate default destination file for given source file.
-     * @param source The source file.
-     * @return A {@code Path} instance, never {@code null}.
-     * @throws NullPointerException If {@code source} is {@code null}.
-     */
-    public static Path createDefaultDestination(final Path source) throws NullPointerException {
-        Objects.requireNonNull(source);
-        final Path dir = source.getParent();
-        return createDestination(source, dir);
-    }
-
-    /**
      * Generate destination file for given source file and given target directory.
      * @param source The source file.
      * @param targetDir The target directory.
@@ -100,11 +89,11 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     public static Path createDestination(final Path source, final Path targetDir) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(source);
-        Objects.requireNonNull(targetDir);
-        if (!Files.isDirectory(targetDir)) {
+        final Path outputDir = (targetDir == null) ? source.getParent() : targetDir;
+        if (!Files.isDirectory(outputDir)) {
             throw new IllegalArgumentException("targetDir is not a directory.");
         }
-        final String dir = targetDir.toString();
+        final String dir = outputDir.toString();
         final String sourceName = source.getFileName().toString();
         final String outputName = sourceName.replaceAll("\\.(nc|cdf)", ".txt"); // NOI18N.
         final Path destination = Paths.get(dir, outputName);

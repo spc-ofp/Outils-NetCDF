@@ -5,7 +5,6 @@
  *********************************************/
 package org.spc.ofp.project.netcdfextractor.task;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -33,14 +32,15 @@ public final class BatchExtractToTxtParametersBuilder {
     public BatchExtractToTxtParameters build() {
         final BatchExtractToTxtParameters copy = new BatchExtractToTxtParameters();
         copy.forceGarbageCollection = delegated.forceGarbageCollection;
+        copy.singleDocument = delegated.singleDocument;
+        copy.destinationDir = delegated.destinationDir;
+        copy.separator = delegated.separator;
         delegated.files
                 .entrySet()
                 .forEach(entry -> {
                     final Path source = entry.getKey();
                     final BatchExtractToTxtParameters.Settings settingsSource = entry.getValue();
                     final BatchExtractToTxtParameters.Settings settingsCopy = settingsForSource(copy, source);
-                    settingsCopy.separator = settingsSource.separator;
-                    settingsCopy.destination = settingsSource.destination;
                     settingsCopy.variables.addAll(settingsSource.variables);
                 });
         return copy;
@@ -64,34 +64,30 @@ public final class BatchExtractToTxtParametersBuilder {
         return this;
     }
 
+    public BatchExtractToTxtParametersBuilder singleDocument(final boolean value) {
+        delegated.singleDocument = value;
+        return this;
+    }
+
     /**
      * Sets the separator.
-     * @param source The source file.
      * @param separator The separator.
+     * <br>If {@code null}, the default separator is used instead.
      * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
-     * @throws NullPointerException If {@code source} is {@code null}.
+     * @see BatchExtractToTxtParameters#DEFAULT_SEPARATOR
      */
-    public BatchExtractToTxtParametersBuilder separator(final Path source, final String separator) throws NullPointerException {
-        Objects.requireNonNull(source);
-        if (separator != null) {
-            final BatchExtractToTxtParameters.Settings settings = settingsForSource(delegated, source);
-            settings.separator = separator;
-        }
+    public BatchExtractToTxtParametersBuilder separator(final String separator) {
+        delegated.separator = (separator == null) ? BatchExtractToTxtParameters.DEFAULT_SEPARATOR : separator;
         return this;
     }
 
     /**
      * Sets the destination.
-     * @param source The source file.
      * @param destination The destination.
      * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
-     * @throws NullPointerException If {@code source} is {@code null}.
      */
-    public BatchExtractToTxtParametersBuilder destination(final Path source, final Path destination) throws NullPointerException {
-        Objects.requireNonNull(source);
-        final Path dest = (destination == null) ? BatchExtractToTxtTask.createDefaultDestination(source) : destination;
-        final BatchExtractToTxtParameters.Settings settings = settingsForSource(delegated, source);
-        settings.destination = dest;
+    public BatchExtractToTxtParametersBuilder destinationDir(final Path destination) {
+        delegated.destinationDir = destination;
         return this;
     }
 
@@ -136,21 +132,6 @@ public final class BatchExtractToTxtParametersBuilder {
         return this;
     }
 
-    public BatchExtractToTxtParametersBuilder destinationDir(final Path destinationDir) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(destinationDir);
-        if (!Files.isDirectory(destinationDir)) {
-            throw new IllegalArgumentException("destinationDir is not a directory.");
-        }
-        delegated.files.entrySet()
-                .stream()
-                .forEach(entry -> {
-                    final Path source = entry.getKey();
-                    final BatchExtractToTxtParameters.Settings settings = entry.getValue();
-                    settings.destination = BatchExtractToTxtTask.createDestination(source, destinationDir);
-                });
-        return this;
-    }
-
     /**
      * Gets the settings object for given source file.
      * <br>If no such object exists in the provided parameters, one will be initialized.
@@ -162,7 +143,6 @@ public final class BatchExtractToTxtParametersBuilder {
         BatchExtractToTxtParameters.Settings result = parameters.files.get(source);
         if (result == null) {
             result = new BatchExtractToTxtParameters.Settings();
-            result.destination = BatchExtractToTxtTask.createDefaultDestination(source);
             parameters.files.put(source, result);
         }
         return result;
