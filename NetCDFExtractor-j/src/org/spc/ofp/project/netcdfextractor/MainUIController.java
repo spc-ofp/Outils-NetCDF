@@ -38,6 +38,7 @@ import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
+import org.spc.ofp.project.netcdfextractor.scene.control.extract.ExtractConfigPane;
 import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitor;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
@@ -301,7 +302,9 @@ public final class MainUIController extends ControllerBase {
         if (root == null) {
             return;
         }
-        final BatchExtractToTxtParametersBuilder builder = BatchExtractToTxtParametersBuilder.create();
+        final ExtractConfigPane extractConfigPane = new ExtractConfigPane();
+        final BatchExtractToTxtParametersBuilder builder = extractConfigPane.getParametersBuilder();
+        builder.clearAllFiles();
         root.getChildren()
                 .stream()
                 .forEach(fileItem -> {
@@ -318,11 +321,21 @@ public final class MainUIController extends ControllerBase {
                                 .forEach(variable -> builder.addVariable(file, variable));
                     }
                 });
-        final BatchExtractToTxtParameters parameters = builder.build();
-        if (parameters.isEmpty()) {
-            return;
-        }
-        doExportFilesAsync(parameters);
+        final Dialog dialog = new Dialog();
+        dialog.initOwner(rootPane.getScene().getWindow());
+        dialog.setTitle(Main.I18N.getString("extract.title")); // NOI18N.
+        dialog.getDialogPane().setContent(extractConfigPane);
+        dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+        final Optional<ButtonType> result = dialog.showAndWait();
+        result.ifPresent(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                final BatchExtractToTxtParameters parameters = builder.build();
+                if (!parameters.isEmpty()) {
+                    doExportFilesAsync(parameters);
+                }
+            }
+        });
+        extractConfigPane.dispose();
     }
 
     /**
