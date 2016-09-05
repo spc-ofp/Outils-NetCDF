@@ -5,6 +5,7 @@
  *********************************************/
 package org.spc.ofp.project.netcdfextractor.task;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -123,6 +124,30 @@ public final class BatchExtractToTxtParametersBuilder {
             final BatchExtractToTxtParameters.Settings settings = settingsForSource(delegated, source);
             settings.variables.remove(variable);
         }
+        return this;
+    }
+
+    /**
+     * Clear all files and variable settings.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder clearAllFiles() {
+        delegated.files.clear();
+        return this;
+    }
+
+    public BatchExtractToTxtParametersBuilder destinationDir(final Path destinationDir) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(destinationDir);
+        if (!Files.isDirectory(destinationDir)) {
+            throw new IllegalArgumentException("destinationDir is not a directory.");
+        }
+        delegated.files.entrySet()
+                .stream()
+                .forEach(entry -> {
+                    final Path source = entry.getKey();
+                    final BatchExtractToTxtParameters.Settings settings = entry.getValue();
+                    settings.destination = BatchExtractToTxtTask.createDestination(source, destinationDir);
+                });
         return this;
     }
 

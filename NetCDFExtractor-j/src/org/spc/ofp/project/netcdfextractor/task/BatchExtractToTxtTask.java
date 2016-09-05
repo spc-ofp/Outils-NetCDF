@@ -86,7 +86,25 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     public static Path createDefaultDestination(final Path source) throws NullPointerException {
         Objects.requireNonNull(source);
-        final String dir = source.getParent().toString();
+        final Path dir = source.getParent();
+        return createDestination(source, dir);
+    }
+
+    /**
+     * Generate destination file for given source file and given target directory.
+     * @param source The source file.
+     * @param targetDir The target directory.
+     * @return A {@code Path} instance, never {@code null}.
+     * @throws NullPointerException If {@code source} or {@code targetDir} is {@code null}.
+     * @throws IllegalArgumentException If {@code targetDir} is not a directory.
+     */
+    public static Path createDestination(final Path source, final Path targetDir) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(targetDir);
+        if (!Files.isDirectory(targetDir)) {
+            throw new IllegalArgumentException("targetDir is not a directory.");
+        }
+        final String dir = targetDir.toString();
         final String sourceName = source.getFileName().toString();
         final String outputName = sourceName.replaceAll("\\.(nc|cdf)", ".txt"); // NOI18N.
         final Path destination = Paths.get(dir, outputName);
