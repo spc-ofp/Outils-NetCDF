@@ -1,0 +1,11 @@
+/*********************************************
+ *  Copyright - Pacific Community            *
+ *  Droit de copie - Communauté du Pacifique *
+ *  http://www.spc.int/                      *
+ *********************************************/
+.extract-config-pane {
+    -fx-padding: 3px;
+    -fx-hgap: 3px;
+    -fx-vgap: 3px;
+}
+
