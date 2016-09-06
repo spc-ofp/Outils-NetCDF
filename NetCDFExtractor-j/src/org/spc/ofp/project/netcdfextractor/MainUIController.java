@@ -33,8 +33,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Modality;
-import javafx.stage.StageStyle;
 import org.scenicview.ScenicView;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
@@ -328,7 +326,6 @@ public final class MainUIController extends ControllerBase {
                  Main.I18N.getString("extract.title"), // NOI18N.
                  extractConfigPane,
                  ButtonType.OK, ButtonType.CANCEL);
-        ScenicView.show(dialog.getDialogPane());
         final Optional<ButtonType> result = dialog.showAndWait();
         result.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
