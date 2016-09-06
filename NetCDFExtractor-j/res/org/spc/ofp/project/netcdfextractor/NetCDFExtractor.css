@@ -7,6 +7,17 @@
     font-family: 'FontAwesome';
     src: url('fontawesome-webfont.ttf');
 }
+.root {
+    -bootstrap-tab-c1: #EEEEEE;
+    -bootstrap-tab-c2: #0088CC;    
+    -spc-title: #0B4EA2;
+    -spc-header1: #ffffff;
+    -spc-header2: #26b7b5;
+    -spc-header3: #254aa5;
+    -spc-header4: #254aa5;
+    -spc-header-background: linear-gradient(from 5% -10% to 105% 110%, -spc-header1 0%, -spc-header2 50%, -spc-header3 80%, -spc-header4 100%);        
+    -spc-header-border: black;
+}
 .awesome-icon {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 1.4em;
@@ -34,3 +45,64 @@
     -fx-font-size: 1.4em;
     -fx-text-fill: derive(black, 35%);
 }
+/* Dialogs. */
+.dialog-pane {
+    -fx-background-color: white;
+    -fx-border-color: -spc-header-border;
+    -fx-border-width: 1px 1px 1px 1px;    
+}
+.dialog-pane .header-panel {    
+    -fx-background-color: -spc-header-background;
+    -fx-background-radius: 0px;
+    -fx-background-image: url(assets/header-watermark.png), url(assets/header-arch.png);
+    -fx-background-repeat: repeat-x, no-repeat;
+    -fx-background-position: top left, 99% 100%;
+    -fx-min-height: 50px;
+    -fx-pref-height: 50px;
+    -fx-max-height: 50px;
+}
+.dialog-pane .header-panel .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 2em;
+    -fx-text-fill: -spc-title;
+}
+.dialog-pane .button-bar .button {
+    -fx-padding: 7px 10px 7px 10px;
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+}
+.dialog-pane .button-bar .button:default {
+    -fx-color: green;
+}
+/* Tab panes. */
+.tab-pane .tab-header-background {
+    -fx-background-color: null;
+    -fx-effect: null;
+}
+.tab-pane .tab-header-area .tab {
+    -fx-background-color: null;
+}
+.tab-pane .headers-region {
+    -fx-effect: null;    
+}
+.tab-pane .tab-header-area .tab,
+.tab-pane .tab-header-area .tab:selected {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.4em;    
+}
+.tab-pane .tab-header-area .tab .tab-label {
+    -fx-text-fill: -bootstrap-tab-c1;
+}
+.tab-pane .tab-header-area .tab:selected .tab-label {
+    -fx-text-fill: -bootstrap-tab-c2;
+}
+.tab-pane .tab-header-area .tab .focus-indicator,
+.tab-pane .tab-header-area .tab:selected .focus-indicator {
+    -fx-background-color: null;
+    -fx-border-color: null;
+    -fx-border-width: 0px;
+    -fx-border-insets: 0px;
+    -fx-border-width: 0px;
+    -fx-border-radius: 0px;
+}
+

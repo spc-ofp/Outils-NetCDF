@@ -15,10 +15,10 @@
     -fx-opacity: 0.5;
 }
 .task-progress-pane .button {
-    -fx-padding: 10px 20px 10px 20px;
-    -fx-base: red;
-    -fx-font-size: 1.42em;
+    -fx-padding: 7px 10px 7px 10px;
+    -fx-font-size: 1.2em;
     -fx-font-weight: bold;
+    -fx-color: red;
 }
 
 

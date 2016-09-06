@@ -33,11 +33,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import org.scenicview.ScenicView;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
+import org.spc.ofp.project.netcdfextractor.scene.control.dialog.DialogUtils;
 import org.spc.ofp.project.netcdfextractor.scene.control.extract.ExtractConfigPane;
 import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitor;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
@@ -122,11 +126,10 @@ public final class MainUIController extends ControllerBase {
     void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
         librariesPane.applicationProperty().bind(applicationProperty());
-        final Dialog dialog = new Dialog();
-        dialog.initOwner(rootPane.getScene().getWindow());
-        dialog.setTitle(Main.I18N.getString("about.title")); // NOI18N.
-        dialog.getDialogPane().setContent(librariesPane);
-        dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CLOSE);
+        final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(), 
+            Main.I18N.getString("about.title"), // NOI18N.
+            librariesPane,
+            ButtonType.CLOSE);
         dialog.showAndWait();
         librariesPane.dispose();
     }
@@ -321,11 +324,11 @@ public final class MainUIController extends ControllerBase {
                                 .forEach(variable -> builder.addVariable(file, variable));
                     }
                 });
-        final Dialog dialog = new Dialog();
-        dialog.initOwner(rootPane.getScene().getWindow());
-        dialog.setTitle(Main.I18N.getString("extract.title")); // NOI18N.
-        dialog.getDialogPane().setContent(extractConfigPane);
-        dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
+                 Main.I18N.getString("extract.title"), // NOI18N.
+                 extractConfigPane,
+                 ButtonType.OK, ButtonType.CANCEL);
+        ScenicView.show(dialog.getDialogPane());
         final Optional<ButtonType> result = dialog.showAndWait();
         result.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
