@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.concurrent.Task;
 import ucar.nc2.Attribute;
@@ -67,6 +68,10 @@ public final class VariableHTMLReportTask extends Task<String> {
                     .mapToObj(String::valueOf)
                     .collect(Collectors.joining(" * "));
             out.printf("<br>Shape: %s%n", shape);
+            final long length = Arrays.stream(variable.getShapeAll())
+                    .mapToLong(i -> i)
+                    .reduce(1, Math::multiplyExact);
+            out.printf("<br>Length: %d%n", length);
             out.println("<h2>Attributes</h2>");
             out.println("<table width=\"100%\">");
             out.println("<tr><th>Name</th><th>Type</th><th>Length</th><th>Value(s)</th></tr>");
