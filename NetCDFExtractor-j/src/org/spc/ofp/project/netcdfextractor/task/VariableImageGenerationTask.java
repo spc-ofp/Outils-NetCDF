@@ -14,6 +14,7 @@ import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.util.Pair;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -68,16 +69,17 @@ public final class VariableImageGenerationTask extends Task<Image> {
             final float fillValue = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "_FillValue", Float.NaN).floatValue();
             final float scaleFactor = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "scale_factor", 1).floatValue();
             final float add_offset = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "add_offset", 0).floatValue();
-            final float validMin = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "valid_min", Float.NaN).floatValue();
-            final float validMax = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "valid_max", Float.NaN).floatValue();
+            final Pair<Number, Number> validRange = NetCDFUtils.INSTANCE.getValidRangeAttribute(variable, Float.NaN, Float.NaN);
             // Extract dimensions from the variable.
             final int[] shape = variable.getShape();
             final int xlon = shape[rank - 1];
             final int ylat = shape[rank - 2];
             final Array array = variable.read();
             final Index index = array.getIndex();
-            float min = validMin;
-            float max = validMax;
+            float min = validRange.getKey().floatValue();
+            float max = validRange.getValue().floatValue();
+            // Range is not valid, we have to get throught the matrix.
+            // We only use the 1st layer, the one we will turn into a preview image.
             if (Float.isNaN(min) || Float.isNaN(max)) {
                 for (int y = 0; y < ylat; y++) {
                     index.setDim(rank - 2, y);
@@ -97,6 +99,7 @@ public final class VariableImageGenerationTask extends Task<Image> {
                     }
                 }
             }
+            // Range still not valid, there is nothing we can do.
             if (Float.isNaN(min) || Float.isNaN(max)) {
                 throw new IllegalArgumentException("Cannot compute the [min, max] range of values.");
             }
