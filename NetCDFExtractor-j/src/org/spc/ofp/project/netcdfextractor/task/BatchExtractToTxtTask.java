@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import javafx.concurrent.Task;
 import javafx.util.Pair;
+import org.spc.ofp.project.netcdfextractor.Main;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -127,12 +128,13 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
-            final String title = String.format("%s %d/%d", source.getFileName().toString(), currentFile + 1, totalFiles);
+            final String titlePattern = Main.I18N.getString("extract.title.pattern"); // NOI18N.
+            final String title = String.format(titlePattern, currentFile + 1, totalFiles, source.getFileName().toString());
             updateTitle(title);
             final boolean includeColumnHeader = parameters.isIncludeColumnHeader();
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
-            updateMessage("Collecting variables."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables")); // NOI18N.
             final Variable[] variables = Arrays.stream(variableNames)
                     .map(netcdf::findVariable)
                     .filter(variable -> variable.getRank() == 3 && SUPPORTED_DATA_TYPES.contains(variable.getDataType()))
@@ -146,7 +148,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             }
             ////////////////////////////////////////////////////////////////////
             // Collect dimensions.
-            updateMessage("Collecting dimension."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-dimensions")); // NOI18N.
             final Dimension[] dimensions = variables[0].getDimensions()
                     .stream()
                     .toArray(Dimension[]::new);
@@ -154,7 +156,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Dimension sizes.
-            updateMessage("Collecting dimension sizes."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-dimensions-sizes")); // NOI18N.
             final int[] sizes = Arrays.stream(dimensions)
                     .mapToInt(Dimension::getLength)
                     .toArray();
@@ -164,7 +166,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             ////////////////////////////////////////////////////////////////////
             // Now compute total extraction length.
             // 6 preliminary steps.
-            final int totalRows = sizes[0] * sizes[1] * sizes[2];
+            final long totalRows = sizes[0] * sizes[1] * sizes[2];
             totalProgress = 7;
             // 1 header to write
             if (includeColumnHeader) {
@@ -174,7 +176,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             totalProgress += (dimensions.length + variables.length + 1) * totalRows;
             ////////////////////////////////////////////////////////////////////
             // Variable data type.
-            updateMessage("Collecting variables data types."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-types")); // NOI18N.
             final DataType[] dataTypes = Arrays.stream(variables)
                     .map(Variable::getDataType)
                     .toArray(DataType[]::new);
@@ -184,7 +186,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable fill values.
-            updateMessage("Collecting variables fill values."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-fill-values")); // NOI18N.
             final Number[] fillValues = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "_FillValue", Double.NaN)) // NOI18N.
                     .toArray(Number[]::new);
@@ -194,7 +196,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable missing values.
-            updateMessage("Collecting variables missing values."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-missing-values")); // NOI18N.
             final Number[] missingValues = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "missing_value", Double.NaN)) // NOI18N.
                     .toArray(Number[]::new);
@@ -204,7 +206,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable scale factors.
-            updateMessage("Collecting variables scale factors."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-scale-factors")); // NOI18N.
             final Number[] scaleFactors = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "scale_factor", 1)) // NOI18N.
                     .toArray(Number[]::new);
@@ -214,7 +216,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable add offets.
-            updateMessage("Collecting variables add offsets."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-add-offsets")); // NOI18N.
             final Number[] addOffsets = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "add_offset", 0)) // NOI18N.
                     .toArray(Number[]::new);
@@ -224,7 +226,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Variable valid ranges.
-            updateMessage("Collecting variables valid ranges."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-variables-valid-ranges")); // NOI18N.
             final Pair<Number, Number>[] validRanges = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getValidRangeAttribute(variable, -Double.MAX_VALUE, Double.MAX_VALUE))
                     .toArray(Pair[]::new);
@@ -234,7 +236,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 return;
             }
             // Dimension variables.
-            updateMessage("Collecting dimensions variables."); // NOI18N.
+            updateMessage(Main.I18N.getString("extract.progress.collecting-dimensions-variables")); // NOI18N.
             final Variable[] dimensionVariables = Arrays.stream(dimensions)
                     .map(Dimension::getFullName)
                     .map(dimensionName -> netcdf.findVariable(dimensionName))
@@ -246,7 +248,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             }
             ////////////////////////////////////////////////////////////////////
             // Extract.
-            int currentRow = 0;
+            long currentRow = 0;
+            final String rowPattern = Main.I18N.getString("extract.progress.row.pattern"); // NOI18N.
             try (final BufferedWriter writer = Files.newBufferedWriter(destination);
                     final PrintWriter out = new PrintWriter(writer)) {
                 // Write header.
@@ -277,7 +280,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             xIndex[0] = x;
                             final Array xArray = dimensionVariables[2].read(xIndex, xShape);
                             //
-                            updateMessage(String.format("Row %d/%d", currentRow + 1, totalRows)); // NOI18N.
+                            updateMessage(String.format(rowPattern, currentRow + 1, totalRows));
                             // Time.
                             final long time = zArray.getLong(0);
                             final ZonedDateTime utc = Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC);
