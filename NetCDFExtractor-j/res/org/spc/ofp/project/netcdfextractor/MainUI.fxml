@@ -13,8 +13,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.TreeView?>
@@ -69,27 +67,15 @@
                         </Button>
                      </children>
                   </HBox>
-                      <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                      <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.33, 0.66" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                           <items>
                               <TreeView id="treeView" fx:id="treeView" prefHeight="200.0" prefWidth="200.0" showRoot="false" />
-                        <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
-                          <tabs>
-                            <Tab fx:id="infoTab" text="%tab.info">
-                                 <content>
-                                    <WebView fx:id="infoWebView" prefHeight="200.0" prefWidth="200.0" />
-                                 </content>
-                              </Tab>
-                            <Tab fx:id="imageTab" text="%tab.preview">
-                                 <content>
-                                          <ScrollPane>
-                                              <content>
-                                                  <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
-                                              </content>
-                                          </ScrollPane>
-                                 </content>
-                              </Tab>
-                          </tabs>
-                        </TabPane>
+                        <WebView fx:id="infoWebView" prefHeight="200.0" prefWidth="200.0" />
+                              <ScrollPane>
+                                  <content>
+                                      <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
+                                  </content>
+                              </ScrollPane>
                           </items>
                       </SplitPane>
                </children>
