@@ -165,7 +165,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             // Now compute total extraction length.
             // 6 preliminary steps.
             final int totalRows = sizes[0] * sizes[1] * sizes[2];
-            totalProgress = 6;
+            totalProgress = 7;
             // 1 header to write
             if (includeColumnHeader) {
                 totalProgress += 1;
@@ -186,10 +186,17 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             // Variable fill values.
             updateMessage("Collecting variables fill values."); // NOI18N.
             final Number[] fillValues = Arrays.stream(variables)
-                    .map(variable -> {
-                        final Attribute attribute = variable.findAttribute("_FillValue"); // NOI18N.
-                        return attribute.getNumericValue();
-                    })
+                    .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "_FillValue", Double.NaN)) // NOI18N.
+                    .toArray(Number[]::new);
+            progress++;
+            updateProgress(progress, totalProgress);
+            if (isCancelled()) {
+                return;
+            }
+            // Variable missing values.
+            updateMessage("Collecting variables missing values."); // NOI18N.
+            final Number[] missingValues = Arrays.stream(variables)
+                    .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "missing_value", Double.NaN)) // NOI18N.
                     .toArray(Number[]::new);
             progress++;
             updateProgress(progress, totalProgress);
@@ -199,10 +206,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             // Variable scale factors.
             updateMessage("Collecting variables scale factors."); // NOI18N.
             final Number[] scaleFactors = Arrays.stream(variables)
-                    .map(variable -> {
-                        final Attribute attribute = variable.findAttribute("scale_factor"); // NOI18N.
-                        return attribute.getNumericValue();
-                    })
+                    .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "scale_factor", 1)) // NOI18N.
                     .toArray(Number[]::new);
             progress++;
             updateProgress(progress, totalProgress);
@@ -212,10 +216,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             // Variable add offets.
             updateMessage("Collecting variables add offsets."); // NOI18N.
             final Number[] addOffsets = Arrays.stream(variables)
-                    .map(variable -> {
-                        final Attribute attribute = variable.findAttribute("add_offset"); // NOI18N.
-                        return attribute.getNumericValue();
-                    })
+                    .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "add_offset", 0)) // NOI18N.
                     .toArray(Number[]::new);
             progress++;
             updateProgress(progress, totalProgress);
@@ -225,18 +226,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             // Variable valid ranges.
             updateMessage("Collecting variables valid ranges."); // NOI18N.
             final Pair<Number, Number>[] validRanges = Arrays.stream(variables)
-                    .map(variable -> {
-                        final Attribute validMinAttribute = variable.findAttribute("valid_min"); // NOI18N.
-                        final Attribute validMaxAttribute = variable.findAttribute("valid_max"); // NOI18N.
-                        final Attribute validRangeAttribute = variable.findAttribute("valid_range"); // NOI18N.
-                        Pair<Number, Number> result = null;
-                        if (validMinAttribute == null) {
-                            result = new Pair<>(validRangeAttribute.getNumericValue(0), validRangeAttribute.getNumericValue(1));
-                        } else {
-                            result = new Pair<>(validMinAttribute.getNumericValue(), validMaxAttribute.getNumericValue());
-                        }
-                        return result;
-                    })
+                    .map(variable -> NetCDFUtils.INSTANCE.getValidRangeAttribute(variable, -Double.MAX_VALUE, Double.MAX_VALUE))
                     .toArray(Pair[]::new);
             progress++;
             updateProgress(progress, totalProgress);
@@ -347,7 +337,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                         final double scaleFactor = scaleFactors[variableIndex].doubleValue();
                                         final double addOffset = addOffsets[variableIndex].doubleValue();
                                         final double variableValue = vArray.getDouble(0);
-                                        if (variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
+                                        if (!Double.isNaN(variableValue) && variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
                                             final double value = variableValue * scaleFactor + addOffset;
                                             line.append(value);
                                         }
