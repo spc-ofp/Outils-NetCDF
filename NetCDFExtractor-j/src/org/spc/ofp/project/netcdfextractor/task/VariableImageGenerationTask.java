@@ -6,18 +6,14 @@
 package org.spc.ofp.project.netcdfextractor.task;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javax.imageio.ImageIO;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -25,16 +21,16 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 /**
- *
+ * Generate a preview image from a variable.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public final class ImageGenerationTask extends Task<Image> {
+public final class VariableImageGenerationTask extends Task<Image> {
 
     /**
      * The target directory.
      */
     private final Path file;
-    private final String variablename;
+    private final String variableName;
     private final WritableImage image;
 
     private final boolean invertLat = true;
@@ -42,18 +38,19 @@ public final class ImageGenerationTask extends Task<Image> {
     /**
      * Creates a new instance.
      * @param file The source file.
-     * @param variablename The target variable.
+     * @param variableName The target variable.
      * @param image The target image, may be {@code null}.
-     * @throws NullPointerException If {@code file} or {@code variable} is {@code null}.
+     * @throws NullPointerException If {@code file} or {@code variableName} is {@code null}.
      * @throws IllegalArgumentException If {@code file} does not exist, cannot be read, or is not a file.
      */
-    public ImageGenerationTask(final Path file, final String variablename, final WritableImage image) throws NullPointerException, IllegalArgumentException {
+    public VariableImageGenerationTask(final Path file, final String variableName, final WritableImage image) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(file);
+        Objects.requireNonNull(variableName);
         if (!Files.exists(file) || !Files.isReadable(file) || !Files.isRegularFile(file)) {
             throw new IllegalArgumentException();
         }
         this.file = file;
-        this.variablename = variablename;
+        this.variableName = variableName;
         this.image = image;
     }
 
@@ -62,7 +59,7 @@ public final class ImageGenerationTask extends Task<Image> {
         final String absoluteFilename = file.toAbsolutePath().toString();
         final String filename = file.getFileName().toString();
         try (final NetcdfFile netcdf = NetcdfFile.open(absoluteFilename)) {
-            final Variable variable = netcdf.findVariable(variablename);
+            final Variable variable = netcdf.findVariable(variableName);
             final int rank = variable.getRank();
             System.out.println(variable.getDataType());
             variable.getAttributes().stream().forEach(System.out::println);

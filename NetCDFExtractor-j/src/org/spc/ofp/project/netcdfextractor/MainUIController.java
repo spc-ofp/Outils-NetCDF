@@ -45,7 +45,7 @@ import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonito
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
-import org.spc.ofp.project.netcdfextractor.task.ImageGenerationTask;
+import org.spc.ofp.project.netcdfextractor.task.VariableImageGenerationTask;
 import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
 import org.spc.ofp.project.netcdfextractor.task.VariableHTMLReportTask;
 
@@ -315,7 +315,7 @@ public final class MainUIController extends ControllerBase {
             @Override
             protected Task<Image> createTask() {
                 // Reusing same image leads to visual artefacts.
-                return new ImageGenerationTask(file, variableName, null);
+                return new VariableImageGenerationTask(file, variableName, null);
             }
         };
         service.setOnSucceeded(workerStateEvent -> {
