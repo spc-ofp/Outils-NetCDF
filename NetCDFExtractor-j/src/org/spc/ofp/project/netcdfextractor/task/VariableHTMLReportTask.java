@@ -7,6 +7,7 @@ package org.spc.ofp.project.netcdfextractor.task;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -26,9 +27,19 @@ public final class VariableHTMLReportTask extends Task<String> {
     private final Path file;
     private final String variableName;
 
-    public VariableHTMLReportTask(final Path file, final String variableName) {
+    /**
+     * Creates a new instance.
+     * @param file The source file.
+     * @param variableName The target variable.
+     * @throws NullPointerException If {@code file} or {@code variableName} is {@code null}.
+     * @throws IllegalArgumentException If {@code file} does not exist, cannot be read, or is not a file.
+     */
+    public VariableHTMLReportTask(final Path file, final String variableName) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(file);
         Objects.requireNonNull(variableName);
+        if (!Files.exists(file) || !Files.isReadable(file) || !Files.isRegularFile(file)) {
+            throw new IllegalArgumentException();
+        }
         this.file = file;
         this.variableName = variableName;
     }
