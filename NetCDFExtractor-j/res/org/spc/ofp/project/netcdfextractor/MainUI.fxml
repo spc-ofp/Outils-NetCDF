@@ -10,6 +10,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
@@ -51,7 +52,7 @@
     <center>
         <StackPane id="contentPane" fx:id="contentPane" prefHeight="-1" prefWidth="-1" BorderPane.alignment="CENTER">
          <children>
-            <VBox prefHeight="200.0" prefWidth="100.0">
+            <VBox fx:id="contentVBox" prefHeight="200.0" prefWidth="100.0">
                <children>
                   <HBox fx:id="dirHBox" styleClass="dir-hbox">
                      <children>
@@ -67,17 +68,22 @@
                         </Button>
                      </children>
                   </HBox>
-                      <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.33, 0.66" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                          <items>
-                              <TreeView id="treeView" fx:id="treeView" prefHeight="200.0" prefWidth="200.0" showRoot="false" />
-                        <WebView fx:id="infoWebView" prefHeight="200.0" prefWidth="200.0" />
-                              <ScrollPane>
-                                  <content>
-                                      <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
-                                  </content>
-                              </ScrollPane>
-                          </items>
-                      </SplitPane>
+                  <StackPane prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                     <children>
+                            <SplitPane id="splitPane" fx:id="splitPane" dividerPositions="0.33, 0.66" prefHeight="200.0" prefWidth="200.0">
+                                <items>
+                                    <TreeView id="treeView" fx:id="treeView" prefHeight="200.0" prefWidth="200.0" showRoot="false" />
+                              <WebView fx:id="infoWebView" prefHeight="200.0" prefWidth="200.0" />
+                                    <ScrollPane>
+                                        <content>
+                                            <ImageView id="imageView" fx:id="imageView" preserveRatio="true" />
+                                        </content>
+                                    </ScrollPane>
+                                </items>
+                            </SplitPane>
+                        <ProgressIndicator fx:id="progressIndicator" maxHeight="64.0" maxWidth="64.0" />
+                     </children>
+                  </StackPane>
                </children>
             </VBox>
          </children>

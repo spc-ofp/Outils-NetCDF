@@ -24,6 +24,8 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -61,6 +63,10 @@ public final class MainUIController extends ControllerBase {
     private TextField dirField;
     @FXML
     private Tooltip dirFieldTip;
+    @FXML
+    private SplitPane splitPane;
+    @FXML
+    private ProgressIndicator progressIndicator;
     @FXML
     private TreeView treeView;
     @FXML
@@ -192,7 +198,10 @@ public final class MainUIController extends ControllerBase {
     private void doCloseCurrentDisplay() {
         stopLoadFiles();
         stopGenerateVariableInfo();
-        stopGenerateVariableImage();        
+        stopGenerateVariableImage();
+        //
+        splitPane.setVisible(false);
+        progressIndicator.setVisible(true);
     }
 
     /**
@@ -236,6 +245,8 @@ public final class MainUIController extends ControllerBase {
      */
     private void cleanupLoadFiles() {
         loadFilesServiceOptional = Optional.empty();
+        splitPane.setVisible(true);
+        progressIndicator.setVisible(false);
     }
 
     private void doLoadFilesAsync(final File directory) {
