@@ -19,34 +19,15 @@ public enum NetCDFUtils {
      */
     INSTANCE;
 
-    public float getAttributeValueF(final Variable variable, final String attributeName, final float defaultValue) {
-        float result = defaultValue;
+    public Number getNumericAttribute(final Variable variable, final String attributeName, final Number defaultValue) {
+        Number result = defaultValue;
         final Attribute attribute = variable.findAttribute(attributeName);
         if (attribute != null) {
             result = attribute.getNumericValue().floatValue();
-            if (Float.isNaN(result)) {
-                result = defaultValue;
-            }
         } else {
             final String message = String.format("Could not locate attribute \"%s\" in variable \"%s\", using default value.", attributeName, variable.getShortName());
             Logger.getLogger(getClass().getName()).warning(message);
         }
         return result;
     }
-
-    public double getAttributeValueD(final Variable variable, final String attributeName, final double defaultValue) {
-        double result = defaultValue;
-        final Attribute attribute = variable.findAttribute(attributeName);
-        if (attribute != null) {
-            result = attribute.getNumericValue().doubleValue();
-            if (Double.isNaN(result)) {
-                result = defaultValue;
-            }
-        } else {
-            final String message = String.format("Could not locate attribute \"%s\" in variable \"%s\", using default value.", attributeName, variable.getShortName());
-            Logger.getLogger(getClass().getName()).warning(message);
-        }
-        return result;
-    }
-
 }

@@ -64,12 +64,12 @@ public final class VariableImageGenerationTask extends Task<Image> {
 //            System.out.println(variable.getDataType());
 //            variable.getAttributes().stream().forEach(System.out::println);
             // Extract meta-data from the variable.
-            final float missingValue = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "missing_value", -Float.MAX_VALUE);
-            final float fillValue = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "_FillValue", Float.MAX_VALUE);
-            final float scaleFactor = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "scale_factor", 1);
-            final float add_offset = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "add_offset", 0);
-            final float validMin = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "valid_min", Float.NaN);
-            final float validMax = NetCDFUtils.INSTANCE.getAttributeValueF(variable, "valid_max", Float.NaN);
+            final float missingValue = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "missing_value", Float.NaN).floatValue();
+            final float fillValue = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "_FillValue", Float.NaN).floatValue();
+            final float scaleFactor = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "scale_factor", 1).floatValue();
+            final float add_offset = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "add_offset", 0).floatValue();
+            final float validMin = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "valid_min", Float.NaN).floatValue();
+            final float validMax = NetCDFUtils.INSTANCE.getNumericAttribute(variable, "valid_max", Float.NaN).floatValue();
             // Extract dimensions from the variable.
             final int[] shape = variable.getShape();
             final int xlon = shape[rank - 1];
@@ -79,8 +79,6 @@ public final class VariableImageGenerationTask extends Task<Image> {
             float min = validMin;
             float max = validMax;
             if (Float.isNaN(min) || Float.isNaN(max)) {
-                min = missingValue;
-                max = missingValue;
                 for (int y = 0; y < ylat; y++) {
                     index.setDim(rank - 2, y);
                     for (int x = 0; x < xlon; x++) {
@@ -88,7 +86,7 @@ public final class VariableImageGenerationTask extends Task<Image> {
                         final float sourceValue = array.getFloat(index);
                         if (!Float.isNaN(sourceValue) && sourceValue != fillValue && sourceValue != missingValue) {
                             final float value = sourceValue * scaleFactor + add_offset;
-                            if (min == missingValue) {
+                            if (Float.isNaN(min) || Float.isNaN(max)) {
                                 min = value;
                                 max = value;
                             } else {
