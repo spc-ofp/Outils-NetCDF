@@ -32,8 +32,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
-import org.scenicview.ScenicView;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
@@ -47,6 +47,7 @@ import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuild
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
 import org.spc.ofp.project.netcdfextractor.task.ImageGenerationTask;
 import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
+import org.spc.ofp.project.netcdfextractor.task.VariableHTMLReportTask;
 
 /**
  * FXML Controller class
@@ -62,6 +63,8 @@ public final class MainUIController extends ControllerBase {
     private Tooltip dirFieldTip;
     @FXML
     private TreeView treeView;
+    @FXML
+    private WebView infoWebView;
     @FXML
     private ImageView imageView;
 
@@ -124,10 +127,10 @@ public final class MainUIController extends ControllerBase {
     void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
         librariesPane.applicationProperty().bind(applicationProperty());
-        final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(), 
-            Main.I18N.getString("about.title"), // NOI18N.
-            librariesPane,
-            ButtonType.CLOSE);
+        final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
+                Main.I18N.getString("about.title"), // NOI18N.
+                librariesPane,
+                ButtonType.CLOSE);
         dialog.showAndWait();
         librariesPane.dispose();
     }
@@ -176,7 +179,8 @@ public final class MainUIController extends ControllerBase {
                 final FileInfo fileInfo = (FileInfo) item.getParent().getValue();
                 final Path file = fileInfo.getFile();
                 final String variableName = variableInfo.getFullName();
-                doGenerateImageAsync(file, variableName);
+                doGenerateVariableInfoAsync(file, variableName);
+                doGenerateVariableImageAsync(file, variableName);
             }
         });
     };
@@ -187,7 +191,8 @@ public final class MainUIController extends ControllerBase {
      */
     private void doCloseCurrentDisplay() {
         stopLoadFiles();
-        stopGenerateImage();
+        stopGenerateVariableInfo();
+        stopGenerateVariableImage();        
     }
 
     /**
@@ -196,7 +201,7 @@ public final class MainUIController extends ControllerBase {
     private void stopLoadFiles() {
         loadFilesServiceOptional.ifPresent(service -> {
             service.cancel();
-            cleanupGenerateImage();
+            cleanupGenerateVariableImage();
         });
         treeView.setRoot(null);
     }
@@ -204,12 +209,23 @@ public final class MainUIController extends ControllerBase {
     /**
      * Stop image generation service and clear image display.
      */
-    private void stopGenerateImage() {
-        generateImageServiceOptional.ifPresent(service -> {
+    private void stopGenerateVariableImage() {
+        generateVariableImageServiceOptional.ifPresent(service -> {
             service.cancel();
-            cleanupGenerateImage();
+            cleanupGenerateVariableImage();
         });
         imageView.setImage(null);
+    }
+
+    /**
+     * Stop info generation service and clear image display.
+     */
+    private void stopGenerateVariableInfo() {
+        generateVariableInfoServiceOptional.ifPresent(service -> {
+            service.cancel();
+            cleanupGenerateVariableInfo();
+        });
+        infoWebView.getEngine().loadContent(null);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -249,23 +265,50 @@ public final class MainUIController extends ControllerBase {
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    private Optional<Service<String>> generateVariableInfoServiceOptional = Optional.empty();
+
+    /**
+     * Called at the end of the generate info service.
+     */
+    private void cleanupGenerateVariableInfo() {
+        generateVariableInfoServiceOptional = Optional.empty();
+    }
+
+    private void doGenerateVariableInfoAsync(final Path file, final String variableName) {
+        stopGenerateVariableInfo();
+        //
+        final Service<String> service = new Service<String>() {
+
+            @Override
+            protected Task<String> createTask() {
+                return new VariableHTMLReportTask(file, variableName);
+            }
+        };
+        service.setOnSucceeded(workerStateEvent -> {
+            final String report = (String) workerStateEvent.getSource().getValue();
+            infoWebView.getEngine().loadContent(report);
+            cleanupGenerateVariableInfo();
+        });
+        service.setOnFailed(workerStateEvent -> {
+            final Throwable ex = workerStateEvent.getSource().getException();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            cleanupGenerateVariableInfo();
+        });
+        generateVariableInfoServiceOptional = Optional.of(service);
+        service.start();
+    }
+
+    private Optional<Service<Image>> generateVariableImageServiceOptional = Optional.empty();
+
     /**
      * Called at the end of the generate image service.
      */
-    private Optional<Service> generateImageServiceOptional = Optional.empty();
-
-    private void cleanupGenerateImage() {
-        generateImageServiceOptional = Optional.empty();
+    private void cleanupGenerateVariableImage() {
+        generateVariableImageServiceOptional = Optional.empty();
     }
 
-    private void doGenerateImageAsync(final Path file, final String variableName) {
-        stopGenerateImage();
-        //
-        generateImageServiceOptional.ifPresent(service -> {
-            service.cancel();
-            cleanupGenerateImage();
-        });
-        imageView.setImage(null);
+    private void doGenerateVariableImageAsync(final Path file, final String variableName) {
+        stopGenerateVariableImage();
         //
         final Service<Image> service = new Service<Image>() {
 
@@ -278,14 +321,14 @@ public final class MainUIController extends ControllerBase {
         service.setOnSucceeded(workerStateEvent -> {
             final WritableImage image = (WritableImage) workerStateEvent.getSource().getValue();
             imageView.setImage(image);
-            cleanupGenerateImage();
+            cleanupGenerateVariableImage();
         });
         service.setOnFailed(workerStateEvent -> {
             final Throwable ex = workerStateEvent.getSource().getException();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-            cleanupGenerateImage();
+            cleanupGenerateVariableImage();
         });
-        generateImageServiceOptional = Optional.of(service);
+        generateVariableImageServiceOptional = Optional.of(service);
         service.start();
     }
 
@@ -322,10 +365,10 @@ public final class MainUIController extends ControllerBase {
                                 .forEach(variable -> builder.addVariable(file, variable));
                     }
                 });
-         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
-                 Main.I18N.getString("extract.title"), // NOI18N.
-                 extractConfigPane,
-                 ButtonType.OK, ButtonType.CANCEL);
+        final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
+                Main.I18N.getString("extract.title"), // NOI18N.
+                extractConfigPane,
+                ButtonType.OK, ButtonType.CANCEL);
         final Optional<ButtonType> result = dialog.showAndWait();
         result.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
