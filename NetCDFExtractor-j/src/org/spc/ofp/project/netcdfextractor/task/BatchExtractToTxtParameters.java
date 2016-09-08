@@ -6,10 +6,10 @@
 package org.spc.ofp.project.netcdfextractor.task;
 
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -108,4 +108,41 @@ public final class BatchExtractToTxtParameters {
     public final Settings getSettings(final Path source) {
         return files.get(source);
     }
+
+    public static final int DEFAULT_PERIOD_SIZE = 1;
+
+    int periodSize = DEFAULT_PERIOD_SIZE;
+
+    /**
+     * Gets the size of the time period.
+     * @return An {@code int} &ge; 1.
+     */
+    public int getPeriodSize() {
+        return periodSize;
+    }
+
+    public static final ChronoUnit DEFAULT_PERIOD_UNIT = ChronoUnit.SECONDS;
+
+    ChronoUnit periodUnit = DEFAULT_PERIOD_UNIT;
+
+    /**
+     * Gets the unit of the time period.
+     * @return A {@code ChronoUnit} instance, never {@code null}.
+     */
+    public ChronoUnit getPeriodUnit() {
+        return periodUnit;
+    }
+
+    public static final ZonedDateTime DEFAULT_START_DATE = ZonedDateTime.parse("1970-01-01T00:00Z"); // NOI18N.
+
+    public ZonedDateTime startDate = DEFAULT_START_DATE;
+
+    /**
+     * Gets the start date of the calendar.
+     * @return A {@code ZonedDateTime} instance, never {@code null}.
+     */
+    public ZonedDateTime getStartDate() {
+        return startDate;
+    }
+
 }

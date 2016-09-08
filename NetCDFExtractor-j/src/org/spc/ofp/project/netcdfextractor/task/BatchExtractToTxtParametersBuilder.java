@@ -6,6 +6,8 @@
 package org.spc.ofp.project.netcdfextractor.task;
 
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -36,6 +38,9 @@ public final class BatchExtractToTxtParametersBuilder {
         copy.includeColumnHeader = delegated.includeColumnHeader;
         copy.destinationDir = delegated.destinationDir;
         copy.separator = delegated.separator;
+        copy.periodSize = delegated.periodSize;
+        copy.periodUnit = delegated.periodUnit;
+        copy.startDate = delegated.startDate;
         delegated.files
                 .entrySet()
                 .forEach(entry -> {
@@ -65,13 +70,53 @@ public final class BatchExtractToTxtParametersBuilder {
         return this;
     }
 
+    /**
+     * Sets the single document flag.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
     public BatchExtractToTxtParametersBuilder singleDocument(final boolean value) {
         delegated.singleDocument = value;
         return this;
     }
 
+    /**
+     * Sets the include columns header flag.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
     public BatchExtractToTxtParametersBuilder includeColumnHeader(final boolean value) {
         delegated.includeColumnHeader = value;
+        return this;
+    }
+
+    /**
+     * Sets the size of the time period.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder periodSize(final int value) {
+        delegated.periodSize = (value <= 0) ? BatchExtractToTxtParameters.DEFAULT_PERIOD_SIZE : value;
+        return this;
+    }
+
+    /**
+     * Sets the unit of the time period.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder periodUnit(final ChronoUnit value) {
+        delegated.periodUnit = (value == null) ? BatchExtractToTxtParameters.DEFAULT_PERIOD_UNIT : value;
+        return this;
+    }
+
+    /**
+     * Sets the calendar start date.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder startDate(final ZonedDateTime value) {
+        delegated.startDate = (value == null) ? BatchExtractToTxtParameters.DEFAULT_START_DATE : value;
         return this;
     }
 
