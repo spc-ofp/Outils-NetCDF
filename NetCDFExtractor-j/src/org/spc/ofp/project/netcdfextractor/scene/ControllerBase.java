@@ -6,11 +6,13 @@
 package org.spc.ofp.project.netcdfextractor.scene;
 
 import java.util.Optional;
+import javafx.animation.PauseTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.util.Duration;
 import org.spc.ofp.project.netcdfextractor.ApplicationChild;
 import org.spc.ofp.project.netcdfextractor.Disposable;
 import org.spc.ofp.project.netcdfextractor.Main;
@@ -46,6 +48,7 @@ public abstract class ControllerBase<T extends Node> implements Initializable, D
                 .ifPresent(this::uninstallNode);
         Optional.ofNullable(newValue)
                 .ifPresent(this::installNode);
+        requestUpdateUI();
     };
 
     /**
@@ -62,6 +65,26 @@ public abstract class ControllerBase<T extends Node> implements Initializable, D
      * @param node The parent node, never {@code null}.
      */
     protected void installNode(final T node) {
+    }
+
+    private PauseTransition requestUITimer;
+    private final Duration requestUIWaitTime = Duration.millis(350);
+
+    /**
+    * Request an UI update.
+    */
+    public final void requestUpdateUI() {
+        if (requestUITimer == null) {
+            requestUITimer = new PauseTransition(requestUIWaitTime);
+            requestUITimer.setOnFinished(actionEvent -> updateUI());
+        }
+        requestUITimer.playFromStart();
+    }
+
+    /**
+     * Forcibly update the UI.
+     */
+    protected void updateUI() {
     }
 
     /**
