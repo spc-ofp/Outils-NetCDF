@@ -8,4 +8,30 @@
     -fx-hgap: 3px;
     -fx-vgap: 3px;
 }
-
+.extract-config-pane .h2 {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.3em;
+}
+.extract-config-pane .time-description {
+    -fx-opacity: 0.20;
+    -fx-font-size: 1.2em;
+    -fx-font-style: italic;
+    -fx-text-alignment: center;
+    -fx-translate-y: -25px;
+    -fx-line-spacing: 3px;
+}
+.extract-config-pane .time-description .start-quote,
+.extract-config-pane .time-description .end-quote {
+    -fx-font-family: "Arial";
+    -fx-font-size: 5.5em;
+}
+.extract-config-pane .time-description .start-quote {
+    -fx-translate-y: 30px;
+}
+.extract-config-pane .time-description .end-quote {
+    -fx-translate-y: -5px;
+}
+.extract-config-pane .time-configuration {
+    -fx-text-alignment: justify;
+    -fx-line-spacing: 3px;
+}

@@ -9,42 +9,84 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 
 <fx:root id="GridPane" fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" styleClass="extract-config-pane" stylesheets="@ExtractConfigPane.css" type="GridPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.scene.control.extract.ExtractConfigPaneController">
-   <rowConstraints>
-      <RowConstraints vgrow="NEVER" />
-      <RowConstraints vgrow="NEVER" />
-      <RowConstraints vgrow="NEVER" />
-      <RowConstraints vgrow="NEVER" />
-      <RowConstraints vgrow="NEVER" />
-   </rowConstraints>
-   <columnConstraints>
-      <ColumnConstraints hgrow="NEVER" />
-      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-      <ColumnConstraints hgrow="NEVER" />
-   </columnConstraints>
-   <children>
-      <Label fx:id="dirLabel" text="%extract.dir.label" />
-      <TextField fx:id="dirField" promptText="%extract.dir.prompt" GridPane.columnIndex="1">
-         <tooltip>
-            <Tooltip fx:id="dirFieldTip" text="Empty Tooltip" />
-         </tooltip>
-      </TextField>
-      <Button fx:id="dirButton" mnemonicParsing="false" onAction="#handleDirButton" text="%extract.dir.browse" GridPane.columnIndex="2">
-         <tooltip>
-            <Tooltip fx:id="dirButtonTip" text="%extract.dir.tip" />
-         </tooltip>
-      </Button>
-      <Label fx:id="separatorLabel" text="%extract.separator.label" GridPane.rowIndex="1" />
-      <ComboBox fx:id="separatorCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
-      <TextField fx:id="separatorField" promptText="%extract.separator.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
-      <CheckBox fx:id="singleOutputCheck" mnemonicParsing="false" text="%extract.single-output.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
-      <CheckBox fx:id="includeColumnHeaderCheck" mnemonicParsing="false" text="%extract.include-column-header.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-   </children>
+    <rowConstraints>
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+        <RowConstraints prefHeight="30.0" vgrow="NEVER" />
+        <RowConstraints vgrow="NEVER" />
+    </rowConstraints>
+    <columnConstraints>
+        <ColumnConstraints hgrow="NEVER" />
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="NEVER" />
+    </columnConstraints>
+    <children>
+        <TextFlow fx:id="timeDescriptionFlow" styleClass="time-description" GridPane.columnSpan="2147483647" GridPane.rowIndex="6">
+            <children>
+                <Text fx:id="startQuote" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="start-quote" text="“ " />
+                <Text fx:id="timeDescriptionText" strokeType="OUTSIDE" strokeWidth="0.0" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
+                <Text fx:id="endQuote" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="end-quote" text=" „" />
+            </children>
+        </TextFlow>
+        <Label fx:id="dirLabel" text="%extract.dir.label" />
+        <TextField fx:id="dirField" promptText="%extract.dir.prompt" GridPane.columnIndex="1">
+            <tooltip>
+                <Tooltip fx:id="dirFieldTip" text="Empty Tooltip" />
+            </tooltip>
+        </TextField>
+        <Button fx:id="dirButton" mnemonicParsing="false" onAction="#handleDirButton" text="%extract.dir.browse" GridPane.columnIndex="2">
+            <tooltip>
+                <Tooltip fx:id="dirButtonTip" text="%extract.dir.tip" />
+            </tooltip>
+        </Button>
+        <Label fx:id="separatorLabel" text="%extract.separator.label" GridPane.rowIndex="1" />
+        <ComboBox fx:id="separatorCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+        <TextField fx:id="separatorField" promptText="%extract.separator.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+        <CheckBox fx:id="singleOutputCheck" mnemonicParsing="false" text="%extract.single-output.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+        <CheckBox fx:id="includeColumnHeaderCheck" mnemonicParsing="false" text="%extract.include-column-header.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+        <Label fx:id="timeLabel" styleClass="h2" text="%extract.time.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
+        <TextFlow styleClass="time-configuration" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
+            <children>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.number-of.label" />
+                <Text fx:id="spacer1" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Spinner fx:id="timeUnitSpinner" prefWidth="75.0" />
+                <Text fx:id="spacer2" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <ComboBox fx:id="timeUnitCombo" prefWidth="100.0" />
+                <Text fx:id="spacer3" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.since.label" />
+                <Text fx:id="spacer4" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <DatePicker fx:id="datePicker" prefWidth="100.0" />
+                <Text fx:id="spacer5" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.at.label" />
+                <Text fx:id="spacer6" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Spinner fx:id="timeHourSpinner" prefWidth="75.0" />
+                <Text fx:id="spacer7" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.separator.label" />
+                <Text fx:id="spacer8" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Spinner fx:id="timeMinuteSpinner" prefWidth="75.0" />
+                <Text fx:id="spacer9" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.separator.label" />
+                <Text fx:id="spacer10" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Spinner fx:id="timeSecondSpinner" prefWidth="75.0" />
+                <Text fx:id="spacer11" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />
+                <Spinner fx:id="timeOffsetSpinner" prefWidth="75.0" />
+            </children>
+        </TextFlow>
+    </children>
 </fx:root>
