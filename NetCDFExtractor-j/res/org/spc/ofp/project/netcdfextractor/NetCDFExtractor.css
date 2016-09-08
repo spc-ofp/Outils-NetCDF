@@ -18,6 +18,12 @@
     -spc-header-background: linear-gradient(from 5% -10% to 105% 110%, -spc-header1 0%, -spc-header2 50%, -spc-header3 80%, -spc-header4 100%);        
     -spc-header-border: black;
 }
+.h2 {
+    -fx-text-fill: -spc-header2;
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 0px 0px 0px;
+}
 .awesome-icon {
     -fx-font-family: "FontAwesome";
     -fx-font-size: 1.4em;
