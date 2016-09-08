@@ -5,10 +5,13 @@
  *********************************************/
 package org.spc.ofp.project.netcdfextractor.task;
 
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.logging.Logger;
 import javafx.util.Pair;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
+import ucar.nc2.time.CalendarPeriod.Field;
 
 /**
  * NetCDF utility class.
@@ -43,6 +46,80 @@ public enum NetCDFUtils {
             result = new Pair<>(validMinAttribute.getNumericValue(), validMaxAttribute.getNumericValue());
         } else {
             result = new Pair<>(defaultMin, defaultMax);
+        }
+        return result;
+    }
+
+    /**
+     * Converts a NetCDF {@code Field} (time unit) to a Java {@code ChronoUnit}.
+     * @param field The source value.
+     * @return A {@code ChronoUnit} value, never {@code null}.
+     * @throws NullPointerException If {@code field} is {@code null}.
+     */
+    public ChronoUnit fieldToJava(final Field field) throws NullPointerException {
+        Objects.requireNonNull(field);
+        ChronoUnit result = ChronoUnit.SECONDS;
+        switch (field) {
+            case Millisec:
+                result = ChronoUnit.MILLIS;
+                break;
+            case Second:
+                result = ChronoUnit.SECONDS;
+                break;
+            case Minute:
+                result = ChronoUnit.MINUTES;
+                break;
+            case Hour:
+                result = ChronoUnit.HOURS;
+                break;
+            case Day:
+                result = ChronoUnit.DAYS;
+                break;
+            case Month:
+                result = ChronoUnit.MONTHS;
+                break;
+            case Year:
+                result = ChronoUnit.YEARS;
+                break;
+        }
+        return result;
+    }
+
+    /**
+     * Converts a Java {@code ChronoUnit} to a NetCDF {@code Field} (time unit).
+     * @param chronoUnit The source value.
+     * @return A {@code Field} value, never {@code null}.
+     * @throws NullPointerException If {@code chronoUnit} is {@code null}.
+     * @throws IllegalArgumentException If {@code chronoUnit} is not supported.
+     */
+    public Field fieldFromJava(final ChronoUnit chronoUnit) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(chronoUnit);
+        Field result = Field.Second;
+        switch (chronoUnit) {
+            case MILLIS:
+                result = Field.Millisec;
+                break;
+            case SECONDS:
+                result = Field.Second;
+                break;
+            case MINUTES:
+                result = Field.Minute;
+                break;
+            case HOURS:
+                result = Field.Hour;
+                break;
+            case DAYS:
+                result = Field.Day;
+                break;
+            case MONTHS:
+                result = Field.Month;
+                break;
+            case YEARS:
+                result = Field.Year;
+                break;
+            default:
+                final String message = String.format("%s not supported.", chronoUnit); // NOI18N.
+                throw new IllegalArgumentException(message);
         }
         return result;
     }
