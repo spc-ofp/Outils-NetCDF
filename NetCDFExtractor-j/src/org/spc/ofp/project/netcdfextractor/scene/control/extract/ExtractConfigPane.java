@@ -5,10 +5,13 @@
  *********************************************/
 package org.spc.ofp.project.netcdfextractor.scene.control.extract;
 
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import javafx.scene.layout.GridPane;
 import org.spc.ofp.project.netcdfextractor.Disposable;
 import org.spc.ofp.project.netcdfextractor.scene.FXMLUtils;
+import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 
 /**
@@ -38,7 +41,17 @@ public final class ExtractConfigPane extends GridPane implements Disposable {
      */
     private final BatchExtractToTxtParametersBuilder parametersBuilder = BatchExtractToTxtParametersBuilder.create();
 
-    public BatchExtractToTxtParametersBuilder getParametersBuilder() {
+    BatchExtractToTxtParametersBuilder getParametersBuilder() {
         return parametersBuilder;
+    }
+
+    public void addVariable(final Path source, final String variable) {
+        Objects.requireNonNull(source);
+        getParametersBuilder().addVariable(source, variable);
+        controller.ifPresent(ExtractConfigPaneController::requestUpdateUI);
+    }
+
+    public BatchExtractToTxtParameters createParameters() {
+        return getParametersBuilder().build();
     }
 }

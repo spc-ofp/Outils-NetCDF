@@ -358,8 +358,6 @@ public final class MainUIController extends ControllerBase {
             return;
         }
         final ExtractConfigPane extractConfigPane = new ExtractConfigPane();
-        final BatchExtractToTxtParametersBuilder builder = extractConfigPane.getParametersBuilder();
-        builder.clearAllFiles();
         root.getChildren()
                 .stream()
                 .forEach(fileItem -> {
@@ -373,7 +371,7 @@ public final class MainUIController extends ControllerBase {
                             .toArray(String[]::new);
                     if (variables.length > 0) {
                         Arrays.stream(variables)
-                                .forEach(variable -> builder.addVariable(file, variable));
+                                .forEach(variable -> extractConfigPane.addVariable(file, variable));
                     }
                 });
         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
@@ -383,7 +381,7 @@ public final class MainUIController extends ControllerBase {
         final Optional<ButtonType> result = dialog.showAndWait();
         result.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
-                final BatchExtractToTxtParameters parameters = builder.build();
+                final BatchExtractToTxtParameters parameters = extractConfigPane.createParameters();
                 if (!parameters.isEmpty()) {
                     doExportFilesAsync(parameters);
                 }
