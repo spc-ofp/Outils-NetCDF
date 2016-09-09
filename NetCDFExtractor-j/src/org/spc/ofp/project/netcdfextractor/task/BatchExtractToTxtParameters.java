@@ -21,19 +21,25 @@ import java.util.Set;
  */
 public final class BatchExtractToTxtParameters {
 
-    boolean forceGarbageCollection = true;
+    public static final boolean DEFAULT_FORCE_GC = true;
+
+    boolean forceGarbageCollection = DEFAULT_FORCE_GC;
 
     public boolean isForceGarbageCollection() {
         return forceGarbageCollection;
     }
 
-    boolean singleDocument = false;
+    public static final boolean DEFAULT_SINGLE_DOCUMENT = false;
+
+    boolean singleDocument = DEFAULT_SINGLE_DOCUMENT;
 
     public boolean isSingleDocument() {
         return singleDocument;
     }
 
-    boolean includeColumnHeader = false;
+    public static final boolean DEFAULT_INCLUDE_COLUMN_HEADER = true;
+
+    boolean includeColumnHeader = DEFAULT_INCLUDE_COLUMN_HEADER;
 
     public boolean isIncludeColumnHeader() {
         return includeColumnHeader;
