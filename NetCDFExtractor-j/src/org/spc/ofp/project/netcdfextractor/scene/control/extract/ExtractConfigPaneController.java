@@ -299,6 +299,8 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             } finally {
                 timeEditing = false;
             }
+            updateTimePeriodInParameters();
+            updateStartDateInParameters();
         });
     }
 
