@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -104,6 +105,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     @Override
     public void dispose() {
         try {
+            if (dirField != null) {
+                dirField.textProperty().removeListener(dirChangeListener);
+                dirField = null;
+            }
             if (dirFieldTip != null) {
                 dirFieldTip.textProperty().unbind();
                 dirFieldTip = null;
@@ -164,8 +169,12 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         }
     }
 
+    private final Preferences prefs = Preferences.userNodeForPackage(getClass());
+
     @Override
     public void initialize(final URL url, final ResourceBundle bundle) {
+        dirField.textProperty().addListener(dirChangeListener);
+        //
         dirFieldTip.textProperty().bind(dirField.textProperty());
         //
         separatorField.textProperty().addListener(separatorChangeListener);
@@ -186,12 +195,22 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             }
         });
         //
+        final String separator = prefs.get("separator", BatchExtractToTxtParameters.DEFAULT_SEPARATOR); // NOI18N.
         separatorCombo.getItems().setAll(DEFAULT_SEPARATORS);
-        separatorCombo.getSelectionModel().select(BatchExtractToTxtParameters.DEFAULT_SEPARATOR);
+        if (DEFAULT_SEPARATORS.contains(separator)) {
+            separatorCombo.getSelectionModel().select(separator);
+        } else {
+            separatorCombo.getSelectionModel().select(CUSTOM_SEPARATOR);
+            separatorField.setText(separator);
+        }
         separatorCombo.valueProperty().addListener(separatorChangeListener);
         //
+        final boolean singleDocument = prefs.getBoolean("single.document", BatchExtractToTxtParameters.DEFAULT_SINGLE_DOCUMENT); // NOI18N.
+        singleOutputCheck.setSelected(singleDocument);
         singleOutputCheck.selectedProperty().addListener(singleOuputChangeListener);
         //
+        final boolean includeColumnHeader = prefs.getBoolean("include.column.header", BatchExtractToTxtParameters.DEFAULT_INCLUDE_COLUMN_HEADER); // NOI18N.
+        includeColumnHeaderCheck.setSelected(includeColumnHeader);
         includeColumnHeaderCheck.selectedProperty().addListener(includeColumnHeaderChangeListener);
         //
         timeDescriptionText.setText(null);
@@ -259,7 +278,28 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
 
     @Override
     protected void updateUI() {
+        applyDefaultFolderConfig();
         applyDefaultDateConfig();
+    }
+
+    private boolean baseEditing = false;
+
+    private void applyDefaultFolderConfig() {
+        parentNode().ifPresent(parent -> {
+            final BatchExtractToTxtParameters parameters = parent.createParameters();
+            final Iterator<Path> fileIterator = parameters.getFiles().iterator();
+            if (!fileIterator.hasNext()) {
+                return;
+            }
+            baseEditing = true;
+            try {
+                final Path source = fileIterator.next();
+                dirField.setText(source.getParent().toString());
+            } finally {
+                baseEditing = false;
+            }
+            updateBaseParameters();
+        });
     }
 
     private boolean timeEditing = false;
@@ -273,7 +313,7 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
                 return;
             }
             final Path source = fileIterator.next();
-            timeEditing = true;            
+            timeEditing = true;
             try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
                 final Variable timeVariable = netcdf.findVariable("time"); // NOI18N.
                 final String timeUnitString = timeVariable.getUnitsString();
@@ -319,38 +359,47 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         final DirectoryChooser dialog = new DirectoryChooser();
         dialog.setInitialDirectory(dir);
         final Optional<File> directoryOptional = Optional.ofNullable(dialog.showDialog(rootPane.getScene().getWindow()));
-        directoryOptional.ifPresent(directory -> {
-            dirField.setText(directory.getAbsolutePath());
-            final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
-            builder.destinationDir(Paths.get(directory.toURI()));
-        });
+        directoryOptional.ifPresent(directory -> dirField.setText(directory.getAbsolutePath()));
     }
+
+    /**
+     * Called whenever the directory field text is changed.
+     */
+    private final ChangeListener<String> dirChangeListener = (observable, oldValue, newValue) -> {
+        if (baseEditing) {
+            return;
+        }
+        updateBaseParameters();
+    };
 
     /**
      * Called whenever the separator selection changes.
      */
     private final ChangeListener<String> separatorChangeListener = (observable, oldValue, newValue) -> {
-        final String comboSeparator = separatorCombo.getValue();
-        final String fieldSeparator = separatorField.getText();
-        final String separator = (CUSTOM_SEPARATOR.equals(comboSeparator)) ? fieldSeparator : comboSeparator;
-        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
-        builder.separator(separator);
+        if (baseEditing) {
+            return;
+        }
+        updateBaseParameters();
     };
 
     /**
      * Called whenever the single output checkbox changes state.
      */
     private final ChangeListener<Boolean> singleOuputChangeListener = (observable, oldValue, newValue) -> {
-        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
-        builder.singleDocument(newValue);
+        if (baseEditing) {
+            return;
+        }
+        updateBaseParameters();
     };
 
     /**
      * Called whenever the include column header checkbox changes state.
      */
     private final ChangeListener<Boolean> includeColumnHeaderChangeListener = (observable, oldValue, newValue) -> {
-        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
-        builder.includeColumnHeader(newValue);
+        if (baseEditing) {
+            return;
+        }
+        updateBaseParameters();
     };
 
     /**
@@ -422,6 +471,26 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         }
         updateStartDateInParameters();
     };
+
+    /**
+     * Update base parameters.
+     */
+    private void updateBaseParameters() {
+        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
+        final Path dir = Paths.get(dirField.getText());
+        final boolean singleDocument = singleOutputCheck.isSelected();
+        final boolean includeColumnHeader = includeColumnHeaderCheck.isSelected();
+        final String comboSeparator = separatorCombo.getValue();
+        final String fieldSeparator = separatorField.getText();
+        final String separator = (CUSTOM_SEPARATOR.equals(comboSeparator)) ? fieldSeparator : comboSeparator;
+        builder.destinationDir(dir)
+                .singleDocument(singleDocument)
+                .includeColumnHeader(includeColumnHeader)
+                .separator(separator);
+        prefs.putBoolean("single.document", singleDocument); // NOI18N.
+        prefs.putBoolean("include.column.header", includeColumnHeader); // NOI18N.
+        prefs.put("separator", separator); // NOI18N.
+    }
 
     /**
      * Update the time period values in the parameter.
