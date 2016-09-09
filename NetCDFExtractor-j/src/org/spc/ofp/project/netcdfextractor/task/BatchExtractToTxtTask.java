@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,7 +26,6 @@ import org.spc.ofp.project.netcdfextractor.Main;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -132,6 +132,9 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final String title = String.format(titlePattern, currentFile + 1, totalFiles, source.getFileName().toString());
             updateTitle(title);
             final boolean includeColumnHeader = parameters.isIncludeColumnHeader();
+            final int periodSize = parameters.getPeriodSize();
+            final ChronoUnit periodUnit = parameters.getPeriodUnit();
+            final ZonedDateTime startDate = parameters.getStartDate();
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
             updateMessage(Main.I18N.getString("extract.progress.collecting-variables")); // NOI18N.
@@ -273,17 +276,20 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 for (int z = 0; z < sizes[0]; z++) {
                     zIndex[0] = z;
                     final Array zArray = dimensionVariables[0].read(zIndex, zShape);
+                    final long time = zArray.getLong(0);
                     for (int y = 0; y < sizes[1]; y++) {
                         yIndex[0] = y;
                         final Array yArray = dimensionVariables[1].read(yIndex, yShape);
+                        final float lat = yArray.getFloat(0);
                         for (int x = 0; x < sizes[2]; x++) {
                             xIndex[0] = x;
                             final Array xArray = dimensionVariables[2].read(xIndex, xShape);
+                            final float lon = xArray.getFloat(0);
                             //
                             updateMessage(String.format(rowPattern, currentRow + 1, totalRows));
                             // Time.
-                            final long time = zArray.getLong(0);
-                            final ZonedDateTime utc = Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC);
+//                            final ZonedDateTime utc = Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC);
+                            final ZonedDateTime utc = startDate.plus(time * periodSize, periodUnit);
                             final StringBuilder line = new StringBuilder();
                             line.append(utc);
                             line.append(separator);
@@ -293,7 +299,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                 return;
                             }
                             // Lat.
-                            line.append(yArray.getFloat(0));
+                            line.append(lat);
                             line.append(separator);
                             progress++;
                             updateProgress(progress, totalProgress);
@@ -301,7 +307,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                 return;
                             }
                             // Lon.
-                            line.append(xArray.getFloat(0));
+                            line.append(lon);
                             line.append(separator);
                             progress++;
                             updateProgress(progress, totalProgress);
