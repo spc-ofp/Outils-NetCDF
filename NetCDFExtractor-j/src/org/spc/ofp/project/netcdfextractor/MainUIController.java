@@ -21,9 +21,9 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -60,7 +60,7 @@ import org.spc.ofp.project.netcdfextractor.task.VariableHTMLReportTask;
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class MainUIController extends ControllerBase {
-
+    
     @FXML
     private BorderPane rootPane;
     @FXML
@@ -87,7 +87,7 @@ public final class MainUIController extends ControllerBase {
     private MenuItem extractItem;
     @FXML
     private Button extractButton;
-
+    
     private TaskProgressMonitor taskProgressMonitor;
 
     /**
@@ -95,10 +95,17 @@ public final class MainUIController extends ControllerBase {
      */
     public MainUIController() {
     }
-
+    
     @Override
     public void dispose() {
         try {
+            // Stop all running services.
+            loadFilesServiceOptional.ifPresent(Service::cancel);
+            generateVariableImageServiceOptional.ifPresent(Service::cancel);
+            generateVariableInfoServiceOptional.ifPresent(Service::cancel);
+            exportServices.stream()
+                    .forEach(Service::cancel);
+            //
             if (treeView != null) {
                 treeView.rootProperty().removeListener(treeRootChangeListener);
                 treeView.getSelectionModel().selectedItemProperty().removeListener(selectedTreeItemInvalidationListener);
@@ -121,11 +128,15 @@ public final class MainUIController extends ControllerBase {
                 extractButton.disableProperty().unbind();
                 extractButton = null;
             }
+            if (taskProgressMonitor != null) {
+                taskProgressMonitor.dispose();
+                taskProgressMonitor = null;
+            }
         } finally {
             super.dispose();
         }
     }
-
+    
     @Override
     public void initialize(final URL location, final ResourceBundle bundle) {
         final String homePath = System.getProperty("user.home"); // NOI18N.
@@ -145,46 +156,43 @@ public final class MainUIController extends ControllerBase {
         treeView.getSelectionModel().selectedItemProperty().addListener(selectedTreeItemInvalidationListener);
         treeView.setCellFactory(treeView -> new NetCDFTreeCell());
         //
-        taskProgressMonitor = new TaskProgressMonitor();
-        rootPane.setBottom(taskProgressMonitor);
-        //
         Platform.runLater(() -> {
             final File dir = new File(path);
             doLoadFilesAsync(dir);
         });
     }
-
+    
     @FXML
     private void handleOpenItem() {
         browseForDirectory();
     }
-
+    
     @FXML
     private void handleCloseItem() {
         doCloseCurrentDisplay();
     }
-
+    
     @FXML
     private void handleExitItem() {
         doCloseCurrentDisplay();
         Platform.exit();
     }
-
+    
     @FXML
     private void handleDirButton() {
         browseForDirectory();
     }
-
+    
     @FXML
     private void handleExtractItem() {
         doExportFiles();
     }
-
+    
     @FXML
     private void handleExtractButton() {
         doExportFiles();
     }
-
+    
     @FXML
     private void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
@@ -196,12 +204,12 @@ public final class MainUIController extends ControllerBase {
         dialog.showAndWait();
         librariesPane.dispose();
     }
-
+    
     @FXML
     private void handleSelectAllVariablesItem() {
         doSelectAllVariables();
     }
-
+    
     @FXML
     private void handleSelectAllVariablesButton() {
         doSelectAllVariables();
@@ -363,14 +371,14 @@ public final class MainUIController extends ControllerBase {
         splitPane.setVisible(true);
         progressIndicator.setVisible(false);
     }
-
+    
     private void doLoadFilesAsync(final File directory) {
         doCloseCurrentDisplay();
         if (!directory.exists() || !directory.isDirectory()) {
             return;
         }
         final Service<Object> service = new Service() {
-
+            
             @Override
             protected Task createTask() {
                 return new NavigationTreeConstructionTask(directory.toPath());
@@ -399,12 +407,12 @@ public final class MainUIController extends ControllerBase {
     private void cleanupGenerateVariableInfo() {
         generateVariableInfoServiceOptional = Optional.empty();
     }
-
+    
     private void doGenerateVariableInfoAsync(final Path file, final String variableName) {
         stopGenerateVariableInfo();
         //
         final Service<String> service = new Service<String>() {
-
+            
             @Override
             protected Task<String> createTask() {
                 return new VariableHTMLReportTask(file, variableName);
@@ -423,7 +431,7 @@ public final class MainUIController extends ControllerBase {
         generateVariableInfoServiceOptional = Optional.of(service);
         service.start();
     }
-
+    
     private Optional<Service<Image>> generateVariableImageServiceOptional = Optional.empty();
 
     /**
@@ -432,12 +440,12 @@ public final class MainUIController extends ControllerBase {
     private void cleanupGenerateVariableImage() {
         generateVariableImageServiceOptional = Optional.empty();
     }
-
+    
     private void doGenerateVariableImageAsync(final Path file, final String variableName) {
         stopGenerateVariableImage();
         //
         final Service<Image> service = new Service<Image>() {
-
+            
             @Override
             protected Task<Image> createTask() {
                 // Reusing same image leads to visual artefacts.
@@ -543,7 +551,19 @@ public final class MainUIController extends ControllerBase {
             exportServices.remove(service);
         });
         exportServices.add(service);
-        taskProgressMonitor.setWorker(service);
+        connectToTaskProgressMonitor(service);
         service.start();
+    }
+
+    /**    
+     *
+     */
+    private void connectToTaskProgressMonitor(final Worker worker) {
+        // Initialize the monitor if needed.
+        if (taskProgressMonitor == null) {
+            taskProgressMonitor = new TaskProgressMonitor();
+            rootPane.setBottom(taskProgressMonitor);
+        }
+        taskProgressMonitor.setWorker(worker);
     }
 }
