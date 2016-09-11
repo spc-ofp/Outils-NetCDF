@@ -18,6 +18,9 @@
     -spc-header-background: linear-gradient(from 5% -10% to 105% 110%, -spc-header1 0%, -spc-header2 50%, -spc-header3 80%, -spc-header4 100%);        
     -spc-header-border: black;
 }
+.tooltip {
+    -fx-font-size: 1.0em;
+}
 .h2 {
     -fx-text-fill: -spc-header2;
     -fx-font-size: 1.4em;
