@@ -12,6 +12,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
@@ -22,13 +23,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <?import javafx.scene.web.WebView?>
 
 <BorderPane id="rootPane" fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.MainUIController">
     <top>
         <MenuBar id="menuBar" fx:id="menuBar" BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="%menu.file">
+                <Menu fx:id="fileMenu" mnemonicParsing="false" text="%menu.file">
                     <items>
                         <MenuItem id="openItem" fx:id="openItem" mnemonicParsing="false" onAction="#handleOpenItem" text="%menu.file.open" />
                         <MenuItem id="closeItem" fx:id="closeItem" mnemonicParsing="false" onAction="#handleCloseItem" text="%menu.file.close" />
@@ -36,12 +38,21 @@
                         <MenuItem id="exitItem" fx:id="exitItem" mnemonicParsing="false" onAction="#handleExitItem" text="%menu.file.exit" />
                     </items>
                 </Menu>
-            <Menu mnemonicParsing="false" text="%menu.actions">
+            <Menu fx:id="editMenu" mnemonicParsing="false" text="%menu.edit">
+               <items>
+                  <MenuItem fx:id="selectAllVariablesItem" mnemonicParsing="false" onAction="#handleSelectAllVariablesItem" text="%menu.edit.select-all-variables">
+                     <graphic>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-check-square-o" />
+                     </graphic>
+                  </MenuItem>
+               </items>
+            </Menu>
+            <Menu fx:id="actionsMenu" mnemonicParsing="false" text="%menu.actions">
               <items>
-                <MenuItem mnemonicParsing="false" onAction="#handleExtractItem" text="%menu.actions.extract" />
+                <MenuItem fx:id="extractItem" mnemonicParsing="false" onAction="#handleExtractItem" text="%menu.actions.extract" />
               </items>
             </Menu>
-                <Menu mnemonicParsing="false" text="%menu.help">
+                <Menu fx:id="helpMenu" mnemonicParsing="false" text="%menu.help">
                <items>
                   <MenuItem fx:id="aboutItem" mnemonicParsing="false" onAction="#handleAboutItem" text="%menu.help.about" />
                </items>
@@ -64,6 +75,15 @@
                         <Button fx:id="dirButton" mnemonicParsing="false" onAction="#handleDirButton" text="%dir.browse" HBox.hgrow="NEVER">
                            <tooltip>
                               <Tooltip fx:id="dirButtonTip" text="%dir.browse.tip" />
+                           </tooltip>
+                        </Button>
+                        <Separator orientation="VERTICAL" />
+                        <Button fx:id="selectAllVariablesButton" mnemonicParsing="false" onAction="#handleSelectAllVariablesButton" text="%actions.select-all-variables.label">
+                           <graphic>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-check-square-o" />
+                           </graphic>
+                           <tooltip>
+                              <Tooltip text="%actions.select-all-variables.tip" />
                            </tooltip>
                         </Button>
                      </children>

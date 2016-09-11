@@ -18,12 +18,17 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
@@ -45,7 +50,6 @@ import org.spc.ofp.project.netcdfextractor.scene.control.dialog.DialogUtils;
 import org.spc.ofp.project.netcdfextractor.scene.control.extract.ExtractConfigPane;
 import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitor;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
-import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtTask;
 import org.spc.ofp.project.netcdfextractor.task.VariableImageGenerationTask;
 import org.spc.ofp.project.netcdfextractor.task.NavigationTreeConstructionTask;
@@ -73,6 +77,10 @@ public final class MainUIController extends ControllerBase {
     private WebView infoWebView;
     @FXML
     private ImageView imageView;
+    @FXML
+    private MenuItem selectAllVariablesItem;
+    @FXML
+    private Button selectAllVariablesButton;
 
     private TaskProgressMonitor taskProgressMonitor;
 
@@ -80,6 +88,28 @@ public final class MainUIController extends ControllerBase {
      * Creates a new instance.
      */
     public MainUIController() {
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            if (treeView != null) {
+                treeView.rootProperty().removeListener(treeRootChangeListener);
+                treeView.getSelectionModel().selectedItemProperty().removeListener(selectedTreeItemInvalidationListener);
+                treeView.setRoot(null);
+                treeView = null;
+            }
+            if (selectAllVariablesItem != null) {
+                selectAllVariablesItem.disableProperty().unbind();
+                selectAllVariablesItem = null;
+            }
+            if (selectAllVariablesButton != null) {
+                selectAllVariablesButton.disableProperty().unbind();
+                selectAllVariablesButton = null;
+            }
+        } finally {
+            super.dispose();
+        }
     }
 
     @Override
@@ -91,6 +121,10 @@ public final class MainUIController extends ControllerBase {
         //
         dirFieldTip.textProperty().bind(dirField.textProperty());
         //
+        selectAllVariablesItem.setDisable(true);
+        selectAllVariablesButton.setDisable(true);
+        //
+        treeView.rootProperty().addListener(treeRootChangeListener);
         treeView.getSelectionModel().selectedItemProperty().addListener(selectedTreeItemInvalidationListener);
         treeView.setCellFactory(treeView -> new NetCDFTreeCell());
         //
@@ -130,7 +164,7 @@ public final class MainUIController extends ControllerBase {
     }
 
     @FXML
-    void handleAboutItem() {
+    private void handleAboutItem() {
         final LibrariesPane librariesPane = new LibrariesPane();
         librariesPane.applicationProperty().bind(applicationProperty());
         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
@@ -141,6 +175,19 @@ public final class MainUIController extends ControllerBase {
         librariesPane.dispose();
     }
 
+    @FXML
+    private void handleSelectAllVariablesItem() {
+        selectAllVariables();
+    }
+
+    @FXML
+    private void handleSelectAllVariablesButton() {
+        selectAllVariables();
+    }
+
+    /**
+     * Select the directory.
+     */
     private void browseForDirectory() {
         final String path = dirField.getText();
         File dir = new File(path);
@@ -154,11 +201,47 @@ public final class MainUIController extends ControllerBase {
         directoryOptional.ifPresent(directory -> dirField.setText(directory.getAbsolutePath()));
     }
 
+    /**
+     * Select all variables.
+     */
+    private void selectAllVariables() {
+        final TreeItem<Object> root = treeView.getRoot();
+        if (root == null) {
+            return;
+        }
+        root.getChildren()
+                .stream()
+                .forEach(fileItem -> fileItem.getChildren()
+                        .stream()
+                        .map(TreeItem::getValue)
+                        .map(object -> (VariableInfo) object)
+                        .forEach(variableInfo -> variableInfo.setSelected(true)));
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     /** 
      * Access to user preferences.
      */
     private final Preferences prefs = Preferences.userNodeForPackage(getClass());
+
+    /** 
+     * Called whenever the root of the tree view is replaced.
+     */
+    private final ChangeListener<TreeItem> treeRootChangeListener = (observable, oldValue, newValue) -> {
+        // Unbind control and put them in a disabled state.
+        Optional.ofNullable(oldValue).ifPresent(oldRoot -> {
+            selectAllVariablesItem.disableProperty().unbind();
+            selectAllVariablesItem.setDisable(true);
+            selectAllVariablesButton.disableProperty().unbind();
+            selectAllVariablesButton.setDisable(true);
+        });
+        // Bind control to the size of the root's children list.
+        Optional.ofNullable(newValue).ifPresent(newRoot -> {
+            final BooleanBinding treeHasNoContent = Bindings.isEmpty(newRoot.getChildren());
+            selectAllVariablesItem.disableProperty().bind(treeHasNoContent);
+            selectAllVariablesButton.disableProperty().bind(treeHasNoContent);
+        });
+    };
 
     /**
      * Called whenever the directory set by the user is edited.
