@@ -77,10 +77,16 @@ public final class MainUIController extends ControllerBase {
     private WebView infoWebView;
     @FXML
     private ImageView imageView;
+    // Select all.
     @FXML
     private MenuItem selectAllVariablesItem;
     @FXML
     private Button selectAllVariablesButton;
+    // Extract
+    @FXML
+    private MenuItem extractItem;
+    @FXML
+    private Button extractButton;
 
     private TaskProgressMonitor taskProgressMonitor;
 
@@ -107,6 +113,14 @@ public final class MainUIController extends ControllerBase {
                 selectAllVariablesButton.disableProperty().unbind();
                 selectAllVariablesButton = null;
             }
+            if (extractItem != null) {
+                extractItem.disableProperty().unbind();
+                extractItem = null;
+            }
+            if (extractButton != null) {
+                extractButton.disableProperty().unbind();
+                extractButton = null;
+            }
         } finally {
             super.dispose();
         }
@@ -120,9 +134,12 @@ public final class MainUIController extends ControllerBase {
         dirField.textProperty().addListener(dirChangeListener);
         //
         dirFieldTip.textProperty().bind(dirField.textProperty());
-        //
+        // Select all.
         selectAllVariablesItem.setDisable(true);
         selectAllVariablesButton.setDisable(true);
+        // Extract.
+        extractItem.setDisable(true);
+        extractButton.setDisable(true);
         //
         treeView.rootProperty().addListener(treeRootChangeListener);
         treeView.getSelectionModel().selectedItemProperty().addListener(selectedTreeItemInvalidationListener);
@@ -160,7 +177,12 @@ public final class MainUIController extends ControllerBase {
 
     @FXML
     private void handleExtractItem() {
-        exportFiles();
+        doExportFiles();
+    }
+
+    @FXML
+    private void handleExtractButton() {
+        doExportFiles();
     }
 
     @FXML
@@ -177,12 +199,12 @@ public final class MainUIController extends ControllerBase {
 
     @FXML
     private void handleSelectAllVariablesItem() {
-        selectAllVariables();
+        doSelectAllVariables();
     }
 
     @FXML
     private void handleSelectAllVariablesButton() {
-        selectAllVariables();
+        doSelectAllVariables();
     }
 
     /**
@@ -204,7 +226,7 @@ public final class MainUIController extends ControllerBase {
     /**
      * Select all variables.
      */
-    private void selectAllVariables() {
+    private void doSelectAllVariables() {
         final TreeItem<Object> root = treeView.getRoot();
         if (root == null) {
             return;
@@ -230,16 +252,26 @@ public final class MainUIController extends ControllerBase {
     private final ChangeListener<TreeItem> treeRootChangeListener = (observable, oldValue, newValue) -> {
         // Unbind control and put them in a disabled state.
         Optional.ofNullable(oldValue).ifPresent(oldRoot -> {
+            // Select all.
             selectAllVariablesItem.disableProperty().unbind();
             selectAllVariablesItem.setDisable(true);
             selectAllVariablesButton.disableProperty().unbind();
             selectAllVariablesButton.setDisable(true);
+            // Extract
+            extractItem.disableProperty().unbind();
+            extractItem.setDisable(true);
+            extractButton.disableProperty().unbind();
+            extractButton.setDisable(true);
         });
         // Bind control to the size of the root's children list.
         Optional.ofNullable(newValue).ifPresent(newRoot -> {
             final BooleanBinding treeHasNoContent = Bindings.isEmpty(newRoot.getChildren());
+            // Select all.
             selectAllVariablesItem.disableProperty().bind(treeHasNoContent);
             selectAllVariablesButton.disableProperty().bind(treeHasNoContent);
+            // Extract.
+            extractItem.disableProperty().bind(treeHasNoContent);
+            extractButton.disableProperty().bind(treeHasNoContent);
         });
     };
 
@@ -435,11 +467,24 @@ public final class MainUIController extends ControllerBase {
     /**
      * Export selected files.
      */
-    private void exportFiles() {
+    private void doExportFiles() {
         final TreeItem<Object> root = treeView.getRoot();
         if (root == null) {
             return;
         }
+        // Check if there is anything to export.
+        final boolean canExport = root.getChildren()
+                .stream()
+                .map(fileItem -> fileItem.getChildren()
+                        .stream()
+                        .map(variableItem -> (VariableInfo) variableItem.getValue())
+                        .map(variableInfo -> variableInfo.isSelected())
+                        .reduce(false, (a, b) -> a || b))
+                .reduce(false, (a, b) -> a || b);
+        if (!canExport) {
+            return;
+        }
+        // Prepare export dialog.
         final ExtractConfigPane extractConfigPane = new ExtractConfigPane();
         root.getChildren()
                 .stream()

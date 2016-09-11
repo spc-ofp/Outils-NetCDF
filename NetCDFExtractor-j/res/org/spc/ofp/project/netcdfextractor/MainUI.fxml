@@ -49,7 +49,10 @@
             </Menu>
             <Menu fx:id="actionsMenu" mnemonicParsing="false" text="%menu.actions">
               <items>
-                <MenuItem fx:id="extractItem" mnemonicParsing="false" onAction="#handleExtractItem" text="%menu.actions.extract" />
+                <MenuItem fx:id="extractItem" mnemonicParsing="false" onAction="#handleExtractItem" text="%menu.actions.extract">
+                     <graphic>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-download" />
+                     </graphic></MenuItem>
               </items>
             </Menu>
                 <Menu fx:id="helpMenu" mnemonicParsing="false" text="%menu.help">
@@ -85,6 +88,15 @@
                            <tooltip>
                               <Tooltip text="%actions.select-all-variables.tip" />
                            </tooltip>
+                        </Button>
+                        <Separator orientation="VERTICAL" />
+                        <Button fx:id="extractButton" mnemonicParsing="false" onAction="#handleExtractButton" text="%actions.extract.label">
+                           <tooltip>
+                              <Tooltip text="%actions.extract.tip" />
+                           </tooltip>
+                           <graphic>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-download" />
+                           </graphic>
                         </Button>
                      </children>
                   </HBox>
