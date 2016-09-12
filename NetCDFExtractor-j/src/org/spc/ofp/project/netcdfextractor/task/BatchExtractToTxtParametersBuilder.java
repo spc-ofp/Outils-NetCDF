@@ -37,6 +37,7 @@ public final class BatchExtractToTxtParametersBuilder {
         copy.singleDocument = delegated.singleDocument;
         copy.includeColumnHeader = delegated.includeColumnHeader;
         copy.destinationDir = delegated.destinationDir;
+        copy.missingValue = delegated.missingValue;
         copy.separator = delegated.separator;
         copy.periodSize = delegated.periodSize;
         copy.periodUnit = delegated.periodUnit;
@@ -87,6 +88,16 @@ public final class BatchExtractToTxtParametersBuilder {
      */
     public BatchExtractToTxtParametersBuilder includeColumnHeader(final boolean value) {
         delegated.includeColumnHeader = value;
+        return this;
+    }
+
+    /**
+     * Sets the missing value.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder missingValue(final Object value) {
+        delegated.missingValue = value;
         return this;
     }
 

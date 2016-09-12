@@ -30,6 +30,7 @@
         <RowConstraints vgrow="NEVER" />
         <RowConstraints vgrow="NEVER" />
       <RowConstraints vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
       <RowConstraints prefHeight="30.0" vgrow="NEVER" />
       <RowConstraints vgrow="NEVER" />
     </rowConstraints>
@@ -39,7 +40,7 @@
         <ColumnConstraints hgrow="NEVER" />
     </columnConstraints>
     <children>
-        <TextFlow fx:id="timeDescriptionFlow" styleClass="time-description" GridPane.columnSpan="2147483647" GridPane.rowIndex="8">
+        <TextFlow fx:id="timeDescriptionFlow" styleClass="time-description" GridPane.columnSpan="2147483647" GridPane.rowIndex="9">
             <children>
                 <Text fx:id="startQuote" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="start-quote" text="“ " />
                 <Text fx:id="timeDescriptionText" strokeType="OUTSIDE" strokeWidth="0.0" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
@@ -60,12 +61,21 @@
         </Button>
         <CheckBox fx:id="singleOutputCheck" mnemonicParsing="false" text="%extract.single-output.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
       <Label fx:id="formatLabel" styleClass="h2" text="%extract.format.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
-        <Label fx:id="separatorLabel" text="%extract.separator.label" GridPane.rowIndex="4" />
-        <ComboBox fx:id="separatorCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-        <TextField fx:id="separatorField" promptText="%extract.separator.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
-        <CheckBox fx:id="includeColumnHeaderCheck" mnemonicParsing="false" text="%extract.include-column-header.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
-        <Label fx:id="timeLabel" styleClass="h2" text="%extract.time.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
-        <TextFlow styleClass="time-configuration" GridPane.columnSpan="2147483647" GridPane.rowIndex="9">
+        <Label fx:id="separatorLabel" text="%extract.separator.label" GridPane.rowIndex="5" />
+        <ComboBox fx:id="separatorCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
+        <TextField fx:id="separatorField" promptText="%extract.separator.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="6">
+         <tooltip>
+            <Tooltip text="%extract.separator.tip" />
+         </tooltip></TextField>
+      <Label fx:id="missingValueLabel" text="%extract.missing-value.label" GridPane.rowIndex="7" />
+      <TextField fx:id="missingValueField" promptText="%extract.missing-value.prompt" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
+         <tooltip>
+            <Tooltip text="%extract.missing-value.tip" />
+         </tooltip>
+      </TextField>
+        <CheckBox fx:id="includeColumnHeaderCheck" mnemonicParsing="false" text="%extract.include-column-header.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+        <Label fx:id="timeLabel" styleClass="h2" text="%extract.time.label" GridPane.columnSpan="2147483647" GridPane.rowIndex="8" />
+        <TextFlow styleClass="time-configuration" GridPane.columnSpan="2147483647" GridPane.rowIndex="10">
             <children>
                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%extract.time.number-of.label" />
                 <Text fx:id="spacer1" strokeType="OUTSIDE" strokeWidth="0.0" text=" " />

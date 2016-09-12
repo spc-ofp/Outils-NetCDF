@@ -46,6 +46,21 @@ public final class BatchExtractToTxtParameters {
     }
 
     /**
+     * The default missing value, is equal to {@value}.    
+     */
+    public static String DEFAULT_MISSING_VALUE = "NaN"; // NOI18N.
+
+    Object missingValue = DEFAULT_MISSING_VALUE;
+
+    /**
+     * The value to be printed out when encountering a missing, fill or out of bounds value in the file.
+     * @return The missing value, may be {@code null}.
+     */
+    public Object getMissingValue() {
+        return missingValue;
+    }
+
+    /**
      * The default separator, is equal to {@value}.    
      */
     public static final String DEFAULT_SEPARATOR = ","; // NOI18N.

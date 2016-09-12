@@ -11,8 +11,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -135,6 +133,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final int periodSize = parameters.getPeriodSize();
             final ChronoUnit periodUnit = parameters.getPeriodUnit();
             final ZonedDateTime startDate = parameters.getStartDate();
+            final Object outputMissingValue = parameters.getMissingValue();
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
             updateMessage(Main.I18N.getString("extract.progress.collecting-variables")); // NOI18N.
@@ -328,13 +327,16 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     case LONG: {
                                         final long validMin = validRanges[variableIndex].getKey().longValue();
                                         final long validMax = validRanges[variableIndex].getValue().longValue();
+                                        final long missingValue = missingValues[variableIndex].longValue();
                                         final long fillValue = fillValues[variableIndex].longValue();
                                         final long scaleFactor = scaleFactors[variableIndex].longValue();
                                         final long addOffset = addOffsets[variableIndex].longValue();
                                         final long variableValue = vArray.getLong(0);
-                                        if (variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
+                                        if (variableValue != fillValue && variableValue != missingValue && validMin <= variableValue && variableValue <= validMax) {
                                             final long value = variableValue * scaleFactor + addOffset;
                                             line.append(value);
+                                        } else if (outputMissingValue != null) {
+                                            line.append(outputMissingValue);
                                         }
                                     }
                                     break;
@@ -342,13 +344,16 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     case DOUBLE: {
                                         final double validMin = validRanges[variableIndex].getKey().doubleValue();
                                         final double validMax = validRanges[variableIndex].getValue().doubleValue();
+                                        final double missingValue = missingValues[variableIndex].doubleValue();
                                         final double fillValue = fillValues[variableIndex].doubleValue();
                                         final double scaleFactor = scaleFactors[variableIndex].doubleValue();
                                         final double addOffset = addOffsets[variableIndex].doubleValue();
                                         final double variableValue = vArray.getDouble(0);
-                                        if (!Double.isNaN(variableValue) && variableValue != fillValue && validMin <= variableValue && variableValue <= validMax) {
+                                        if (!Double.isNaN(variableValue) && variableValue != fillValue && variableValue != missingValue && validMin <= variableValue && variableValue <= validMax) {
                                             final double value = variableValue * scaleFactor + addOffset;
                                             line.append(value);
+                                        } else if (outputMissingValue != null) {
+                                            line.append(outputMissingValue);
                                         }
                                     }
                                     break;

@@ -13,7 +13,7 @@
     -fx-font-size: 1.3em;
 }
 .extract-config-pane .time-description {
-    -fx-opacity: 0.20;
+    -fx-opacity: 0.33;
     -fx-font-size: 1.2em;
     -fx-font-style: italic;
     -fx-text-alignment: center;

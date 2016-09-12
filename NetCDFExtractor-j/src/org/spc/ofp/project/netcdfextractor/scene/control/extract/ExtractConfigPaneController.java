@@ -76,6 +76,8 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     @FXML
     private TextField separatorField;
     @FXML
+    private TextField missingValueField;
+    @FXML
     private CheckBox singleOutputCheck;
     @FXML
     private CheckBox includeColumnHeaderCheck;
@@ -119,6 +121,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             }
             if (separatorCombo != null) {
                 separatorCombo.valueProperty().removeListener(separatorChangeListener);
+            }
+            if (missingValueField != null) {
+                missingValueField.textProperty().removeListener(missingValueChangeListener);
+                missingValueField = null;
             }
             if (singleOutputCheck != null) {
                 singleOutputCheck.selectedProperty().removeListener(singleOuputChangeListener);
@@ -194,6 +200,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
                 return CUSTOM_SEPARATOR.equals(separator);
             }
         });
+        //
+        final String missingValue = prefs.get("missing.value", BatchExtractToTxtParameters.DEFAULT_MISSING_VALUE); // NOI18N.
+        missingValueField.setText(missingValue);
+        missingValueField.textProperty().addListener(missingValueChangeListener);
         //
         final String separator = prefs.get("separator", BatchExtractToTxtParameters.DEFAULT_SEPARATOR); // NOI18N.
         separatorCombo.getItems().setAll(DEFAULT_SEPARATORS);
@@ -383,6 +393,16 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     };
 
     /**
+     * Called whenever the missing value changes.
+     */
+    private final ChangeListener<String> missingValueChangeListener = (observable, oldValue, newValue) -> {
+        if (baseEditing) {
+            return;
+        }
+        updateBaseParameters();
+    };
+
+    /**
      * Called whenever the single output checkbox changes state.
      */
     private final ChangeListener<Boolean> singleOuputChangeListener = (observable, oldValue, newValue) -> {
@@ -483,13 +503,16 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         final String comboSeparator = separatorCombo.getValue();
         final String fieldSeparator = separatorField.getText();
         final String separator = (CUSTOM_SEPARATOR.equals(comboSeparator)) ? fieldSeparator : comboSeparator;
+        final String missingValue = missingValueField.getText();
         builder.destinationDir(dir)
                 .singleDocument(singleDocument)
                 .includeColumnHeader(includeColumnHeader)
-                .separator(separator);
+                .separator(separator)
+                .missingValue(missingValue);
         prefs.putBoolean("single.document", singleDocument); // NOI18N.
         prefs.putBoolean("include.column.header", includeColumnHeader); // NOI18N.
         prefs.put("separator", separator); // NOI18N.
+        prefs.put("missing.value", missingValue); // NOI18N.
     }
 
     /**
