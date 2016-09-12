@@ -111,7 +111,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             DataType.DOUBLE
     )));
 
-    private long progress = 0;
+    private long currentProgress = 0;
     private long totalProgress = 100;
 
     private int currentFile = 0;
@@ -127,6 +127,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
      */
     private void exportFile(final Path source, final Path destination, final String separator, final String... variableNames) throws IOException, InvalidRangeException {
         try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
+            currentProgress = 0;
+            //
             final String titlePattern = Main.I18N.getString("extract.title.pattern"); // NOI18N.
             final String title = String.format(titlePattern, currentFile + 1, totalFiles, source.getFileName().toString());
             updateTitle(title);
@@ -184,8 +186,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final DataType[] dataTypes = Arrays.stream(variables)
                     .map(Variable::getDataType)
                     .toArray(DataType[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -194,8 +196,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final Number[] fillValues = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "_FillValue", Double.NaN)) // NOI18N.
                     .toArray(Number[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -204,8 +206,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final Number[] missingValues = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "missing_value", Double.NaN)) // NOI18N.
                     .toArray(Number[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -214,8 +216,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final Number[] scaleFactors = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "scale_factor", 1)) // NOI18N.
                     .toArray(Number[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -224,8 +226,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final Number[] addOffsets = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getNumericAttribute(variable, "add_offset", 0)) // NOI18N.
                     .toArray(Number[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -234,8 +236,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final Pair<Number, Number>[] validRanges = Arrays.stream(variables)
                     .map(variable -> NetCDFUtils.INSTANCE.getValidRangeAttribute(variable, -Double.MAX_VALUE, Double.MAX_VALUE))
                     .toArray(Pair[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -245,8 +247,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                     .map(Dimension::getFullName)
                     .map(dimensionName -> netcdf.findVariable(dimensionName))
                     .toArray(Variable[]::new);
-            progress++;
-            updateProgress(progress, totalProgress);
+            currentProgress++;
+            updateProgress(currentProgress, totalProgress);
             if (isCancelled()) {
                 return;
             }
@@ -259,8 +261,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                 // Write header.
                 if (includeColumnHeader) {
                     writeHeader(out, separator, dimensions, variables);
-                    progress++;
-                    updateProgress(progress, totalProgress);
+                    currentProgress++;
+                    updateProgress(currentProgress, totalProgress);
                     if (isCancelled()) {
                         return;
                     }
@@ -294,24 +296,24 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             final ZonedDateTime utc = startDate.plus(time * periodSize, periodUnit);
                             line.append(utc.format(dateTimeFormatter));
                             line.append(separator);
-                            progress++;
-                            updateProgress(progress, totalProgress);
+                            currentProgress++;
+                            updateProgress(currentProgress, totalProgress);
                             if (isCancelled()) {
                                 return;
                             }
                             // Lat.
                             line.append(lat);
                             line.append(separator);
-                            progress++;
-                            updateProgress(progress, totalProgress);
+                            currentProgress++;
+                            updateProgress(currentProgress, totalProgress);
                             if (isCancelled()) {
                                 return;
                             }
                             // Lon.
                             line.append(lon);
                             line.append(separator);
-                            progress++;
-                            updateProgress(progress, totalProgress);
+                            currentProgress++;
+                            updateProgress(currentProgress, totalProgress);
                             if (isCancelled()) {
                                 return;
                             }
@@ -361,8 +363,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                                     break;
                                 }
                                 line.append(separator);
-                                progress++;
-                                updateProgress(progress, totalProgress);
+                                currentProgress++;
+                                updateProgress(currentProgress, totalProgress);
                                 if (isCancelled()) {
                                     return;
                                 }
@@ -370,8 +372,8 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             // Write line.
                             line.delete(line.lastIndexOf(separator), line.length());
                             out.println(line.toString());
-                            progress++;
-                            updateProgress(progress, totalProgress);
+                            currentProgress++;
+                            updateProgress(currentProgress, totalProgress);
                             if (isCancelled()) {
                                 return;
                             }
