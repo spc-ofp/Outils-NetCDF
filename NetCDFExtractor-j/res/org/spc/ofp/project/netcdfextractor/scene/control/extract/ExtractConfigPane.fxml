@@ -33,6 +33,7 @@
       <RowConstraints vgrow="NEVER" />
       <RowConstraints prefHeight="30.0" vgrow="NEVER" />
       <RowConstraints vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
     </rowConstraints>
     <columnConstraints>
         <ColumnConstraints hgrow="NEVER" />
@@ -102,5 +103,7 @@
                 <Spinner fx:id="timeOffsetSpinner" prefWidth="75.0" />
             </children>
         </TextFlow>
+      <Label fx:id="timeOutputFormat" text="%extract.time.output-format.label" GridPane.rowIndex="11" />
+      <ComboBox fx:id="timeOutputCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="11" />
     </children>
 </fx:root>

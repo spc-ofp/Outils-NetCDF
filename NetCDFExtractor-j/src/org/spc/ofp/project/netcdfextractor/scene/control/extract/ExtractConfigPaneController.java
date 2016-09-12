@@ -12,11 +12,16 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.chrono.Chronology;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -97,6 +102,8 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     private Spinner<Integer> timeSecondSpinner;
     @FXML
     private Spinner<Integer> timeOffsetSpinner;
+    @FXML
+    private ComboBox<DateTimeFormatter> timeOutputCombo;
 
     /**
      * Creates a new instance.
@@ -169,6 +176,13 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
                 timeOffsetSpinner.valueProperty().removeListener(timeOffsetChangeListener);
                 timeOffsetSpinner.setValueFactory(null);
                 timeOffsetSpinner = null;
+            }
+            if (timeOutputCombo != null) {
+                timeOutputCombo.valueProperty().removeListener(timeOutputFormatChangeListener);
+                timeOutputCombo.getItems().clear();
+                timeOutputCombo.setButtonCell(null);
+                timeOutputCombo.setCellFactory(null);
+                timeOutputCombo = null;
             }
         } finally {
             super.dispose();
@@ -276,6 +290,15 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         });
         timeOffsetSpinner.getEditor().setTextFormatter(utcFormatter);
         timeOffsetSpinner.valueProperty().addListener(timeOffsetChangeListener);
+        //
+        final int timeFormatterIndex = prefs.getInt("time.formatter.index", 0); // NOI18N.
+        final String customPattern = bundle.getString("extract.time.output-format.custom1.label"); // NOI18N.
+        timeOutputCombo.setButtonCell(new DateTimeFormatterListCell());
+        timeOutputCombo.setCellFactory(listView -> new DateTimeFormatterListCell());
+        timeOutputCombo.getItems().setAll(BatchExtractToTxtParameters.DEFAULT_DATE_TIME_FORMATTER,
+                DateTimeFormatter.ofPattern(customPattern)); // NOI18N.
+        timeOutputCombo.getSelectionModel().select(timeFormatterIndex);
+        timeOutputCombo.valueProperty().addListener(timeOutputFormatChangeListener);
     }
 
     @Override
@@ -351,6 +374,7 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             }
             updateTimePeriodInParameters();
             updateStartDateInParameters();
+            updateTimeFormatterInParameters();
         });
     }
 
@@ -493,6 +517,16 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     };
 
     /**
+     * Called whenever the date time formatter changes.
+     */
+    private final ChangeListener<DateTimeFormatter> timeOutputFormatChangeListener = (observable, oldValue, newValue) -> {
+        if (timeEditing) {
+            return;
+        }
+        updateTimeFormatterInParameters();
+    };
+
+    /**
      * Update base parameters.
      */
     private void updateBaseParameters() {
@@ -522,8 +556,6 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
         final int timePeriodSize = timeUnitSpinner.getValue();
         final ChronoUnit timePeriodUnit = timeUnitCombo.getValue();
-        builder.periodSize(timePeriodSize)
-                .periodUnit(timePeriodUnit);
     }
 
     /**
@@ -541,22 +573,12 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         builder.startDate(startDate);
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    /**
-     * List cell for chrono units.
-     * @author Fabrice Bouyé (fabriceb@spc.int)
-     */
-    private static class ChronoUnitListCell extends ListCell<ChronoUnit> {
-
-        @Override
-        protected void updateItem(final ChronoUnit item, final boolean empty) {
-            super.updateItem(item, empty);
-            String text = null;
-            if (!empty && item != null) {
-                final String key = String.format("extract.time.unit-%s.label", item.name().toLowerCase()); // NOI18N.
-                text = Main.I18N.getString(key);
-            }
-            setText(text);
-        }
+    private void updateTimeFormatterInParameters() {
+        final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
+        final DateTimeFormatter dateTimeFormatter = timeOutputCombo.getValue();
+        builder.dateTimeFormatter(dateTimeFormatter);
+        final int timeFormatterIndex = timeOutputCombo.getItems().indexOf(dateTimeFormatter);
+        prefs.putInt("time.formatter.index", timeFormatterIndex); // NOI18N.
     }
+
 }

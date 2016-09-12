@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,6 +135,7 @@ public final class BatchExtractToTxtTask extends Task<Void> {
             final ChronoUnit periodUnit = parameters.getPeriodUnit();
             final ZonedDateTime startDate = parameters.getStartDate();
             final Object outputMissingValue = parameters.getMissingValue();
+            final DateTimeFormatter dateTimeFormatter = parameters.getDateTimeFormatter();
             ////////////////////////////////////////////////////////////////////
             // Collect variables.
             updateMessage(Main.I18N.getString("extract.progress.collecting-variables")); // NOI18N.
@@ -286,11 +288,11 @@ public final class BatchExtractToTxtTask extends Task<Void> {
                             final float lon = xArray.getFloat(0);
                             //
                             updateMessage(String.format(rowPattern, currentRow + 1, totalRows));
+                            final StringBuilder line = new StringBuilder();
                             // Time.
 //                            final ZonedDateTime utc = Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC);
                             final ZonedDateTime utc = startDate.plus(time * periodSize, periodUnit);
-                            final StringBuilder line = new StringBuilder();
-                            line.append(utc);
+                            line.append(utc.format(dateTimeFormatter));
                             line.append(separator);
                             progress++;
                             updateProgress(progress, totalProgress);

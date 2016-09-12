@@ -7,6 +7,7 @@ package org.spc.ofp.project.netcdfextractor.task;
 
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -52,6 +53,14 @@ public final class BatchExtractToTxtParameters {
 
     Object missingValue = DEFAULT_MISSING_VALUE;
 
+    public static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
+    
+    DateTimeFormatter dateTimeFormatter = DEFAULT_DATE_TIME_FORMATTER;
+    
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+    
     /**
      * The value to be printed out when encountering a missing, fill or out of bounds value in the file.
      * @return The missing value, may be {@code null}.

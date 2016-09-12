@@ -7,6 +7,7 @@ package org.spc.ofp.project.netcdfextractor.task;
 
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -38,6 +39,7 @@ public final class BatchExtractToTxtParametersBuilder {
         copy.includeColumnHeader = delegated.includeColumnHeader;
         copy.destinationDir = delegated.destinationDir;
         copy.missingValue = delegated.missingValue;
+        copy.dateTimeFormatter = delegated.dateTimeFormatter;
         copy.separator = delegated.separator;
         copy.periodSize = delegated.periodSize;
         copy.periodUnit = delegated.periodUnit;
@@ -98,6 +100,16 @@ public final class BatchExtractToTxtParametersBuilder {
      */
     public BatchExtractToTxtParametersBuilder missingValue(final Object value) {
         delegated.missingValue = value;
+        return this;
+    }
+
+    /**
+     * Sets the date time formatter.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder dateTimeFormatter(final DateTimeFormatter value) {
+        delegated.dateTimeFormatter = (value == null) ? BatchExtractToTxtParameters.DEFAULT_DATE_TIME_FORMATTER : value;
         return this;
     }
 
