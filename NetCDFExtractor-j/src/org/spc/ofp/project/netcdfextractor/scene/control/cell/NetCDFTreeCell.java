@@ -5,19 +5,16 @@
  *********************************************/
 package org.spc.ofp.project.netcdfextractor.scene.control.cell;
 
+import javafx.beans.value.ChangeListener;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import org.spc.ofp.project.netcdfextractor.Main;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 
 /**
- * Treel cell for the NetCDF tree.
+ * Tree cell for the NetCDF tree.
  * <br>As of 2016/08/31, the tree should only contain instances of:
  * <ul>
  * <li>{@code org.spc.ofp.project.netcdfextractor.data.FileInfo}</li>
@@ -29,8 +26,8 @@ import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
  */
 public final class NetCDFTreeCell extends TreeCell {
 
-    private static PseudoClass FILE_PSEUDO_CLASS = PseudoClass.getPseudoClass("file"); // NOI18N.    
-    private static PseudoClass VARIABLE_PSEUDO_CLASS = PseudoClass.getPseudoClass("variable"); // NOI18N.    
+    private static final PseudoClass FILE_PSEUDO_CLASS = PseudoClass.getPseudoClass("file"); // NOI18N.    
+    private static final PseudoClass VARIABLE_PSEUDO_CLASS = PseudoClass.getPseudoClass("variable"); // NOI18N.    
 
     /**
      * Delegated checkbox.
@@ -56,11 +53,12 @@ public final class NetCDFTreeCell extends TreeCell {
         super.updateItem(item, empty);
         if (object != null && object != item) {
             if (object instanceof FileInfo) {
-                final FileInfo fileInfo = (FileInfo) object;
-                checkBox.selectedProperty().unbindBidirectional(fileInfo.selectedProperty());
+                final FileInfo info = (FileInfo) object;
+                info.selectedStateProperty().removeListener(fileSelectedStateChangeListener);
+                checkBox.selectedProperty().removeListener(fileSelectionChangeListener);
             } else if (object instanceof VariableInfo) {
-                final VariableInfo variableInfo = (VariableInfo) object;
-                checkBox.selectedProperty().unbindBidirectional(variableInfo.selectedProperty());
+                final VariableInfo info = (VariableInfo) object;
+                checkBox.selectedProperty().unbindBidirectional(info.selectedProperty());
             }
             object = null;
         }
@@ -73,18 +71,13 @@ public final class NetCDFTreeCell extends TreeCell {
                 pseudoClassStateChanged(FILE_PSEUDO_CLASS, true);
                 final FileInfo info = (FileInfo) item;
                 text = info.toString();
-//                graphic = checkBox;
-//                if (object != info) {
-//                    object = info;
-//                    checkBox.selectedProperty().bindBidirectional(info.selectedProperty());
-//                }
-                final Tooltip buttonTip = new Tooltip();
-                buttonTip.setText(Main.I18N.getString("tree.actions.select-all-variables")); // NOI18N.
-                final Button button = new Button();
-                button.setText(Main.I18N.getString("icon.fa-check-square-o")); // NOI18N.
-                button.setOnAction(actionEvent -> selectAllVariables());
-                button.setTooltip(buttonTip);
-                graphic = button;
+                graphic = checkBox;
+                if (object != info) {
+                    object = info;
+                    updateFileCheckBox(info.getSelectedState());
+                    info.selectedStateProperty().addListener(fileSelectedStateChangeListener);
+                    checkBox.selectedProperty().addListener(fileSelectionChangeListener);
+                }
             } else if (item instanceof VariableInfo) {
                 pseudoClassStateChanged(VARIABLE_PSEUDO_CLASS, true);
                 final VariableInfo info = (VariableInfo) item;
@@ -101,16 +94,48 @@ public final class NetCDFTreeCell extends TreeCell {
     }
 
     /**
-     * Select all variables items underneath a file item.
+     * Select / unselect all variables items underneath a file item.
+     * @param selected If {@code true}, the variable is selected.
      */
-    private void selectAllVariables() {
-        final TreeItem<Object> fileItem = getTreeItem();
-        if (fileItem == null || !(fileItem.getValue() instanceof FileInfo)) {
-            return;
+    private void selectAllVariables(final boolean selected) {
+        final Object item = getItem();
+        if (item instanceof FileInfo) {
+            final FileInfo fileInfo = (FileInfo) item;
+            fileInfo.selectAllVariables(selected);
         }
-        fileItem.getChildren()
-                .stream()
-                .map(variableItem -> (VariableInfo) variableItem.getValue())
-                .forEach(variableInfo -> variableInfo.setSelected(true));
     }
+
+    /**
+    * Update a file info check box state.
+    * @param state The file info selected state.
+    */
+    private void updateFileCheckBox(final FileInfo.SelectedSate state) {
+        switch (state) {
+            case ALL:
+                checkBox.setIndeterminate(false);
+                checkBox.setSelected(true);
+                break;
+            case NONE:
+                checkBox.setIndeterminate(false);
+                checkBox.setSelected(false);
+                break;
+            case SOME:
+                checkBox.setIndeterminate(true);
+                break;
+        }
+    }
+
+    /**
+     * Called when check box of a file info is clicked.
+     */
+    private final ChangeListener<Boolean> fileSelectionChangeListener = (observable, oldValue, newValue) -> {
+        selectAllVariables(newValue);
+    };
+
+    /**
+     * Called when the selected state of a file info changes.
+     */
+    private final ChangeListener<FileInfo.SelectedSate> fileSelectedStateChangeListener = (observable, oldValue, newValue) -> {
+        updateFileCheckBox(newValue);
+    };
 }

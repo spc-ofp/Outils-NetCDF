@@ -46,7 +46,7 @@ public final class VariableInfo {
     /**
      * Sets whether this variable is selected.
      */
-    private final BooleanProperty selected = new SimpleBooleanProperty(this, "sekected", false); // NOI18N.
+    private final BooleanProperty selected = new SimpleBooleanProperty(this, "selected", false); // NOI18N.
 
     public final boolean isSelected() {
         return selected.get();

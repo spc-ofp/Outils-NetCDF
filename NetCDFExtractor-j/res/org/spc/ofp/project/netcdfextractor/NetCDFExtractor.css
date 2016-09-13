@@ -37,10 +37,13 @@
     -fx-spacing: 3px;
     -fx-alignment: baseline-left;
 }
+/* Cells in the NetCDF tree. */
 .netcdf-cell {    
 }
+.netcdf-cell:variable {
+}
 .netcdf-cell:file {
-    -fx-content-display: right;
+    -fx-font-weight: bold;
 }
 .netcdf-cell .check-box {
     -fx-graphic-text-gap: 0px;

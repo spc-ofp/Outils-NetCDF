@@ -141,10 +141,10 @@ public final class NavigationTreeConstructionTask extends Task<TreeItem> {
                 variableItemList.add(variableItem);
             }
             // Create file info.
-            final String[] variableNames = Arrays.stream(variables)
-                    .map(variable -> variable.getShortName())
-                    .toArray(String[]::new);
-            final FileInfo fileInfo = new FileInfo(file, variableNames);
+            final VariableInfo[] variableInfos = variableItemList.stream()
+                    .map(TreeItem::getValue)
+                    .toArray(VariableInfo[]::new);
+            final FileInfo fileInfo = new FileInfo(file, variableInfos);
             final TreeItem result = new TreeItem(fileInfo);
             result.getChildren().setAll(variableItemList);
             result.setExpanded(true);

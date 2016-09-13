@@ -8,9 +8,12 @@ package org.spc.ofp.project.netcdfextractor.data;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
 
 /**
  * Pre-load NetCDF files for the navigator UI.
@@ -18,16 +21,47 @@ import javafx.beans.property.SimpleBooleanProperty;
  */
 public final class FileInfo {
 
+    /**
+     * The source file.
+     */
     private final Path file;
-    private final List<String> variables;
+    /**
+     * The variables descriptors.
+     */
+    private final Set<VariableInfo> variables;
 
-    public FileInfo(final Path file, final String... variables) {
-        this.file = file;
-        this.variables = Collections.unmodifiableList(Arrays.asList(variables));
+    /**
+     * Possible selected states of this file info.
+     * @author Fabrice Bouyé (fabriceb@spc.int)
+     */
+    public enum SelectedSate {
+        /**
+         * No variable selected.
+         */
+        NONE,
+        /**
+         * Some variables selected.
+         */
+        SOME,
+        /**
+         * All variables selected.
+         */
+        ALL;
     }
 
-    public Path getFile() {
-        return file;
+    /**
+     * Creates a new instance.
+     * @param file The source file.
+     * @param variables The variables descriptors.
+     * @throws NullPointerException If {@code file} is {@code null}.
+     */
+    public FileInfo(final Path file, final VariableInfo... variables) throws NullPointerException {
+        Objects.requireNonNull(file);
+        this.file = file;
+        this.variables = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(variables)));
+        this.variables.stream()
+                .forEach(variableInfo -> variableInfo.selectedProperty().addListener(variableSelectedChangeListener));
+        recomputeSelectedState();
     }
 
     @Override
@@ -35,22 +69,62 @@ public final class FileInfo {
         return file.getFileName().toString();
     }
 
-    ////////////////////////////////////////////////////////////////////////////    
     /**
-     * Sets whether this file is selected.
+     * Gets the source file.
+     * @return A {@code Path} instance, never {@code null}.
      */
-    private final BooleanProperty selected = new SimpleBooleanProperty(this, "sekected", false); // NOI18N.
-
-    public final boolean isSelected() {
-        return selected.get();
+    public Path getFile() {
+        return file;
     }
 
-    public final void setSelected(final boolean value) {
-        selected.set(value);
+    /**
+     * Select all variables in this info.
+     * @param selected The value.
+     */
+    public void selectAllVariables(final boolean selected) {
+        selectedEditing = true;
+        variables.stream()
+                .forEach(variableInfo -> variableInfo.setSelected(selected));
+        selectedEditing = false;
+        recomputeSelectedState();
     }
 
-    public final BooleanProperty selectedProperty() {
-        return selected;
+    /**
+     * Editing flag.
+     */
+    private boolean selectedEditing = false;
+
+    /**
+     * Recompute the selected state.
+     */
+    private void recomputeSelectedState() {
+        if (selectedEditing) {
+            return;
+        }
+        final long totalVariableCount = variables.size();
+        final long selectedVariableCount = variables.stream()
+                .filter(VariableInfo::isSelected)
+                .count();
+        final SelectedSate newState = (selectedVariableCount == 0) ? SelectedSate.NONE : (selectedVariableCount == totalVariableCount) ? SelectedSate.ALL : SelectedSate.SOME;
+        selectedState.set(newState);
     }
 
+    /**
+    * Called whenever the selected property of a variable changes.
+    */
+    private final ChangeListener<Boolean> variableSelectedChangeListener = (observable, oldValue, newValue) -> recomputeSelectedState();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * The selected state of this info object.
+     */
+    private final ReadOnlyObjectWrapper<SelectedSate> selectedState = new ReadOnlyObjectWrapper<>(this, "selectedState", SelectedSate.NONE); // NOI18N.
+
+    public final SelectedSate getSelectedState() {
+        return selectedState.get();
+    }
+
+    public final ReadOnlyObjectProperty<SelectedSate> selectedStateProperty() {
+        return selectedState.getReadOnlyProperty();
+    }
 }
