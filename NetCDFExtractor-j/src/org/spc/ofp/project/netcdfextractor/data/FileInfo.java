@@ -79,6 +79,7 @@ public final class FileInfo {
 
     /**
      * Select all variables in this info.
+     * <br>Calling this method allow to recompute the selected state only once.
      * @param selected The value.
      */
     public void selectAllVariables(final boolean selected) {
@@ -110,8 +111,8 @@ public final class FileInfo {
     }
 
     /**
-    * Called whenever the selected property of a variable changes.
-    */
+     * Called whenever the selected property of a variable changes.
+     */
     private final ChangeListener<Boolean> variableSelectedChangeListener = (observable, oldValue, newValue) -> recomputeSelectedState();
 
     ////////////////////////////////////////////////////////////////////////////
