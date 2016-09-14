@@ -556,6 +556,8 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
         final BatchExtractToTxtParametersBuilder builder = parentNode().get().getParametersBuilder();
         final int timePeriodSize = timeUnitSpinner.getValue();
         final ChronoUnit timePeriodUnit = timeUnitCombo.getValue();
+        builder.periodSize(timePeriodSize)
+                .periodUnit(timePeriodUnit);
     }
 
     /**
