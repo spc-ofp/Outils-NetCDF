@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright - Pacific Community                   
+ Droit de copie - Communauté du Pacifique 
+ http://www.spc.int/                                                
+-->
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+
+<fx:root id="BorderPane" prefHeight="600.0" prefWidth="600.0" styleClass="about-pane" stylesheets="@AboutPane.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.ofp.project.netcdfextractor.scene.control.about.AboutPaneController">
+    <top>
+        <GridPane styleClass="header">
+            <columnConstraints>
+                <ColumnConstraints />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="-Infinity" />
+                <RowConstraints minHeight="-Infinity" />
+                <RowConstraints minHeight="-Infinity" />
+            </rowConstraints>
+            <children>
+                <ImageView fx:id="appIcon" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.rowSpan="3">
+                    <image>
+                        <Image url="@../../../assets/NetCDFExtractor.png" />
+                    </image>
+                </ImageView>
+                <Label fx:id="appTitleLabel" styleClass="title" text="Label" GridPane.columnIndex="1" />
+                <Label fx:id="appVersionLabel" styleClass="version" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextFlow fx:id="appAboutFlow" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <children>
+                        <Text text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus fringilla tempor nisi sed sagittis. Nam aliquet, diam id bibendum venenatis, dolor mauris fermentum nibh, aliquam placerat mi dui viverra massa." />
+                    </children>
+                </TextFlow>     
+            </children>       
+        </GridPane>
+    </top>
+    <center>
+        <Accordion GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+            <panes>
+                <TitledPane animated="false" text="%about.acknowledgements.label">
+                    <content>
+                        <fx:include fx:id="acknowledgementPane" source="AcknowledgementPane.fxml" />
+                    </content>
+                </TitledPane>
+                <TitledPane fx:id="librariesTitledPane" animated="false" text="%about.libraries.label">
+                    <content>
+                        <StackPane fx:id="librariesStack" />
+                    </content>              
+                </TitledPane>
+                <TitledPane animated="false" text="untitled 3">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    </content>
+                </TitledPane>
+            </panes>
+        </Accordion>
+    </center>
+</fx:root>

@@ -41,11 +41,14 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import org.scenicview.ScenicView;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
 import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
-import org.spc.ofp.project.netcdfextractor.scene.control.about.libraries.LibrariesPane;
+import org.spc.ofp.project.netcdfextractor.scene.control.about.AboutPane;
 import org.spc.ofp.project.netcdfextractor.scene.control.dialog.DialogUtils;
 import org.spc.ofp.project.netcdfextractor.scene.control.extract.ExtractConfigPane;
 import org.spc.ofp.project.netcdfextractor.scene.control.task.TaskProgressMonitor;
@@ -195,14 +198,16 @@ public final class MainUIController extends ControllerBase {
     
     @FXML
     private void handleAboutItem() {
-        final LibrariesPane librariesPane = new LibrariesPane();
-        librariesPane.applicationProperty().bind(applicationProperty());
+        final AboutPane aboutPane = new AboutPane();
+        aboutPane.applicationProperty().bind(applicationProperty());
         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
+                //Modality.NONE, StageStyle.UNDECORATED, null,
                 Main.I18N.getString("about.title"), // NOI18N.
-                librariesPane,
+                aboutPane,
                 ButtonType.CLOSE);
+        //ScenicView.show(dialog.getDialogPane());
         dialog.showAndWait();
-        librariesPane.dispose();
+        aboutPane.dispose();
     }
     
     @FXML

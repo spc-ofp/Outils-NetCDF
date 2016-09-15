@@ -71,8 +71,8 @@ public abstract class ControllerBase<T extends Node> implements Initializable, D
     private final Duration requestUIWaitTime = Duration.millis(350);
 
     /**
-    * Request an UI update.
-    */
+     * Request an UI update.
+     */
     public final void requestUpdateUI() {
         if (requestUITimer == null) {
             requestUITimer = new PauseTransition(requestUIWaitTime);
@@ -126,5 +126,17 @@ public abstract class ControllerBase<T extends Node> implements Initializable, D
      */
     public final Optional<T> parentNode() {
         return Optional.ofNullable(getNode());
+    }
+
+    /**
+     * Show given URI in the default external native app.
+     * @param uri The URI.
+     */
+    protected void showDocument(final String uri) {
+        if (uri == null) {
+            return;
+        }
+        Optional.ofNullable(getApplication())
+                .ifPresent(application -> application.getHostServices().showDocument(uri));
     }
 }

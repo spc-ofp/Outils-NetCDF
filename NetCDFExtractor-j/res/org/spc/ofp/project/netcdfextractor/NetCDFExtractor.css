@@ -11,6 +11,7 @@
     -bootstrap-tab-c1: #EEEEEE;
     -bootstrap-tab-c2: #0088CC;    
     -spc-title: #0B4EA2;
+    -spc-strong: #254aa5;
     -spc-header1: #ffffff;
     -spc-header2: #26b7b5;
     -spc-header3: #254aa5;
@@ -26,6 +27,24 @@
     -fx-font-size: 1.4em;
     -fx-font-weight: bold;
     -fx-padding: 5px 0px 0px 0px;
+}
+.text:strong {
+    -fx-font-weight: bold;
+    -fx-fill: -spc-strong;    
+}
+.label:strong {
+    -fx-font-weight: bold;
+    -fx-text-fill: -spc-strong;
+}
+.hyperlink, 
+.hyperlink:hover,
+.hyperlink:visited{
+    -fx-font-weight: bold;
+    -fx-text-fill: -spc-strong;    
+    -fx-underline:  false;
+    -fx-border-color: null;
+    -fx-border-width: 0px;
+    -fx-padding: 0px;
 }
 .awesome-icon {
     -fx-font-family: "FontAwesome";

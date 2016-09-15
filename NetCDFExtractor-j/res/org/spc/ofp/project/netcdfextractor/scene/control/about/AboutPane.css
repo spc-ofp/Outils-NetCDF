@@ -1,0 +1,14 @@
+.about-pane {
+    -fx-padding: 3px;
+}
+.about-pane .header {
+    -fx-hgap: 3px;
+    -fx-vgap: 3px;
+}
+.about-pane .title {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.3em;
+}
+.about-pane .version {
+    -fx-font-style: italic;
+}

@@ -23,6 +23,7 @@
             <Text fx:id="ownerText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="owner" text="Owner" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="&#10;&#10;" />
             <Text fx:id="descriptionText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="description" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tortor libero, vehicula vel congue sed, pretium a odio. Nulla nisl eros, fermentum nec tristique non, ultrices a augue." />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" "/>
             <Hyperlink fx:id="homeLink" styleClass="home" text="%about.libraries.more" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="&#10;&#10;" />
             <Text fx:id="licenseText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="license" text="%about.libraries.license" />

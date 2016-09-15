@@ -1,0 +1,8 @@
+.acknowledgement-pane {
+    -fx-padding: 3px;
+    -fx-spacing: 3px;
+    -fx-alignment: top-center;
+}
+.acknowledgement-pane .message {
+    -fx-text-alignment: justify;
+}
