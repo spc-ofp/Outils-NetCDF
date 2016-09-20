@@ -1,5 +1,5 @@
 .about-pane {
-    -fx-padding: 3px;
+    -fx-padding: 6px;
 }
 .about-pane .header {
     -fx-hgap: 3px;
@@ -11,4 +11,9 @@
 }
 .about-pane .version {
     -fx-font-style: italic;
+    -fx-opacity: 0.5;
+}
+.about-pane .titled-pane .content {
+    -fx-background-color: white;
+    -fx-padding: 6px;
 }

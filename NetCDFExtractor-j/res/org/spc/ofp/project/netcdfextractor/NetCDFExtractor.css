@@ -105,6 +105,9 @@
 .dialog-pane .button-bar .button:default {
     -fx-color: green;
 }
+.dialog-pane .content {
+    -fx-padding: 6px 6px 0px 6px;
+}
 /* Tab panes. */
 .tab-pane .tab-header-background {
     -fx-background-color: null;
