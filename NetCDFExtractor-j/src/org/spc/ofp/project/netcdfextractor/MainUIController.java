@@ -7,7 +7,9 @@ package org.spc.ofp.project.netcdfextractor;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +26,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -38,6 +41,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
@@ -63,7 +67,7 @@ import org.spc.ofp.project.netcdfextractor.task.VariableHTMLReportTask;
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class MainUIController extends ControllerBase {
-    
+
     @FXML
     private BorderPane rootPane;
     @FXML
@@ -90,7 +94,7 @@ public final class MainUIController extends ControllerBase {
     private MenuItem extractItem;
     @FXML
     private Button extractButton;
-    
+
     private TaskProgressMonitor taskProgressMonitor;
 
     /**
@@ -98,7 +102,7 @@ public final class MainUIController extends ControllerBase {
      */
     public MainUIController() {
     }
-    
+
     @Override
     public void dispose() {
         try {
@@ -109,6 +113,14 @@ public final class MainUIController extends ControllerBase {
             exportServices.stream()
                     .forEach(Service::cancel);
             //
+            if (dirField != null) {
+                dirField.textProperty().removeListener(dirChangeListener);
+                dirField = null;
+            }
+            if (dirFieldTip != null) {
+                dirFieldTip.textProperty().unbind();
+                dirFieldTip = null;
+            }
             if (treeView != null) {
                 treeView.rootProperty().removeListener(treeRootChangeListener);
                 treeView.getSelectionModel().selectedItemProperty().removeListener(selectedTreeItemInvalidationListener);
@@ -139,13 +151,11 @@ public final class MainUIController extends ControllerBase {
             super.dispose();
         }
     }
-    
+
     @Override
     public void initialize(final URL location, final ResourceBundle bundle) {
-        final String homePath = System.getProperty("user.home"); // NOI18N.
-        final String path = prefs.get("last.directory", homePath); // NOI18N.
-        dirField.setText(path);
         dirField.textProperty().addListener(dirChangeListener);
+        dirField.setOnKeyReleased(dirKeyListener);
         //
         dirFieldTip.textProperty().bind(dirField.textProperty());
         // Select all.
@@ -160,70 +170,87 @@ public final class MainUIController extends ControllerBase {
         treeView.setCellFactory(treeView -> new NetCDFTreeCell());
         //
         Platform.runLater(() -> {
-            final File dir = new File(path);
-            doLoadFilesAsync(dir);
+            final String homePath = System.getProperty("user.home"); // NOI18N.
+            final String dirPath = prefs.get("last.directory", homePath); // NOI18N.
+            final Path directory = Paths.get(dirPath);
+            doLoadFiles(directory);
         });
     }
-    
+
     @FXML
     private void handleOpenItem() {
-        browseForDirectory();
+        doBrowseForDirectory();
     }
-    
+
     @FXML
     private void handleCloseItem() {
         doCloseCurrentDisplay();
     }
-    
+
     @FXML
     private void handleExitItem() {
         doCloseCurrentDisplay();
         Platform.exit();
     }
-    
+
     @FXML
     private void handleDirButton() {
-        browseForDirectory();
+        doBrowseForDirectory();
     }
-    
+
     @FXML
     private void handleExtractItem() {
         doExportFiles();
     }
-    
+
     @FXML
     private void handleExtractButton() {
         doExportFiles();
     }
-    
+
+    @FXML
+    private void handleRefreshViewItem() {
+        doRefreshView();
+    }
+
+    @FXML
+    private void handleRefreshViewButton() {
+        doRefreshView();
+    }
+
     @FXML
     private void handleAboutItem() {
         final AboutPane aboutPane = new AboutPane();
         aboutPane.applicationProperty().bind(applicationProperty());
         final Dialog dialog = DialogUtils.INSTANCE.create(rootPane.getScene().getWindow(),
-                //Modality.NONE, StageStyle.UNDECORATED, null,
+                Modality.NONE, StageStyle.UNDECORATED, null,
                 Main.I18N.getString("about.title"), // NOI18N.
                 aboutPane,
                 ButtonType.CLOSE);
-        //ScenicView.show(dialog.getDialogPane());
+        ScenicView.show(dialog.getDialogPane());
         dialog.showAndWait();
         aboutPane.dispose();
     }
-    
+
     @FXML
     private void handleSelectAllVariablesItem() {
         doSelectAllVariables();
     }
-    
+
     @FXML
     private void handleSelectAllVariablesButton() {
         doSelectAllVariables();
     }
 
+    private void doRefreshView() {
+        final Path directory = Paths.get(dirField.getText());
+        doLoadFiles(directory);
+    }
+
     /**
      * Select the directory.
      */
-    private void browseForDirectory() {
+    private void doBrowseForDirectory() {
         final String path = dirField.getText();
         File dir = new File(path);
         if (!dir.exists() || !dir.isDirectory()) {
@@ -233,7 +260,7 @@ public final class MainUIController extends ControllerBase {
         final DirectoryChooser dialog = new DirectoryChooser();
         dialog.setInitialDirectory(dir);
         final Optional<File> directoryOptional = Optional.ofNullable(dialog.showDialog(rootPane.getScene().getWindow()));
-        directoryOptional.ifPresent(directory -> dirField.setText(directory.getAbsolutePath()));
+        directoryOptional.ifPresent(directory -> doLoadFiles(directory.toPath()));
     }
 
     /**
@@ -288,15 +315,25 @@ public final class MainUIController extends ControllerBase {
         });
     };
 
+    private boolean dirEditing = false;
+
     /**
      * Called whenever the directory set by the user is edited.
      */
     private final ChangeListener<String> dirChangeListener = (observable, oldValue, newValue) -> {
-        final File dir = new File(newValue);
-        if (dir.exists() && dir.isDirectory()) {
-            prefs.put("last.directory", dir.getAbsolutePath());
+        if (dirEditing) {
+            return;
         }
-        doLoadFilesAsync(dir);
+        doRefreshView();
+    };
+
+    private final EventHandler<KeyEvent> dirKeyListener = (event) -> {
+        switch (event.getCode()) {
+            case ENTER: {
+                doRefreshView();
+            }
+            break;
+        }
     };
 
     /**
@@ -376,17 +413,29 @@ public final class MainUIController extends ControllerBase {
         splitPane.setVisible(true);
         progressIndicator.setVisible(false);
     }
-    
-    private void doLoadFilesAsync(final File directory) {
+
+    public void doLoadFiles(final Path directory) {
+        try {
+            dirEditing = true;
+            final String dirPath = directory.toString();
+            dirField.setText(dirPath);
+            prefs.put("last.directory", dirPath);
+            doLoadFilesAsync(directory);
+        } finally {
+            dirEditing = false;
+        }
+    }
+
+    private void doLoadFilesAsync(final Path directory) {
         doCloseCurrentDisplay();
-        if (!directory.exists() || !directory.isDirectory()) {
+        if (!Files.exists(directory) || !Files.isDirectory(directory)) {
             return;
         }
         final Service<Object> service = new Service() {
-            
+
             @Override
             protected Task createTask() {
-                return new NavigationTreeConstructionTask(directory.toPath());
+                return new NavigationTreeConstructionTask(directory);
             }
         };
         service.setOnSucceeded(workerStateEvent -> {
@@ -412,12 +461,12 @@ public final class MainUIController extends ControllerBase {
     private void cleanupGenerateVariableInfo() {
         generateVariableInfoServiceOptional = Optional.empty();
     }
-    
+
     private void doGenerateVariableInfoAsync(final Path file, final String variableName) {
         stopGenerateVariableInfo();
         //
         final Service<String> service = new Service<String>() {
-            
+
             @Override
             protected Task<String> createTask() {
                 return new VariableHTMLReportTask(file, variableName);
@@ -436,7 +485,7 @@ public final class MainUIController extends ControllerBase {
         generateVariableInfoServiceOptional = Optional.of(service);
         service.start();
     }
-    
+
     private Optional<Service<Image>> generateVariableImageServiceOptional = Optional.empty();
 
     /**
@@ -445,12 +494,12 @@ public final class MainUIController extends ControllerBase {
     private void cleanupGenerateVariableImage() {
         generateVariableImageServiceOptional = Optional.empty();
     }
-    
+
     private void doGenerateVariableImageAsync(final Path file, final String variableName) {
         stopGenerateVariableImage();
         //
         final Service<Image> service = new Service<Image>() {
-            
+
             @Override
             protected Task<Image> createTask() {
                 // Reusing same image leads to visual artefacts.

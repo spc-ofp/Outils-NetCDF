@@ -53,6 +53,12 @@
                      <graphic>
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-download" />
                      </graphic></MenuItem>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="refreshViewItem" mnemonicParsing="false" onAction="#handleRefreshViewItem" text="%menu.actions.refresh">
+                     <graphic>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-refresh" />
+                     </graphic>
+                  </MenuItem>
               </items>
             </Menu>
                 <Menu fx:id="helpMenu" mnemonicParsing="false" text="%menu.help">
@@ -79,6 +85,11 @@
                            <tooltip>
                               <Tooltip fx:id="dirButtonTip" text="%dir.browse.tip" />
                            </tooltip>
+                        </Button>
+                        <Button fx:id="refreshViewButton" mnemonicParsing="false">
+                           <graphic>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="awesome-icon" text="%icon.fa-refresh" />
+                           </graphic>
                         </Button>
                         <Separator orientation="VERTICAL" />
                         <Button fx:id="selectAllVariablesButton" mnemonicParsing="false" onAction="#handleSelectAllVariablesButton" text="%actions.select-all-variables.label">
