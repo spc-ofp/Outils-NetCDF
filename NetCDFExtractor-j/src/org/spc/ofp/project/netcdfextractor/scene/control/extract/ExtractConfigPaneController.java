@@ -350,8 +350,10 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
                 Variable timeVariable = netcdf.findVariable((timeVariableName == null) ? BatchExtractToTxtParameters.DEFAULT_TIME_VARIABLE : timeVariableName);
                 if (timeVariable != null) {
                     if (timeVariableCombo.getItems().isEmpty()) {
+                        timeVariableCombo.valueProperty().removeListener(timeVariableChangeListener);
                         timeVariableCombo.getItems().setAll(timeVariableName);
                         timeVariableCombo.getSelectionModel().select(0);
+                        timeVariableCombo.valueProperty().addListener(timeVariableChangeListener);
                     }
                 } else {
                     final String[] variables = netcdf.getDimensions()
