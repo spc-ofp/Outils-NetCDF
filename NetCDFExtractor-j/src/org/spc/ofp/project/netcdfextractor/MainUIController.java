@@ -47,7 +47,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
-import org.scenicview.ScenicView;
 import org.spc.ofp.project.netcdfextractor.scene.control.cell.NetCDFTreeCell;
 import org.spc.ofp.project.netcdfextractor.data.FileInfo;
 import org.spc.ofp.project.netcdfextractor.data.VariableInfo;
@@ -227,7 +226,7 @@ public final class MainUIController extends ControllerBase {
                 Main.I18N.getString("about.title"), // NOI18N.
                 aboutPane,
                 ButtonType.CLOSE);
-        ScenicView.show(dialog.getDialogPane());
+        //ScenicView.show(dialog.getDialogPane());
         dialog.showAndWait();
         aboutPane.dispose();
     }
