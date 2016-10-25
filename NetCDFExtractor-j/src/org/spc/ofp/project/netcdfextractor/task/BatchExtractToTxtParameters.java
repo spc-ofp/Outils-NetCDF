@@ -175,4 +175,15 @@ public final class BatchExtractToTxtParameters {
         return startDate;
     }
 
+    public static final String DEFAULT_TIME_VARIABLE = "time"; // NOI18N.
+
+    String timeVariable = DEFAULT_TIME_VARIABLE;
+
+    /**
+     * Gets the start date of the calendar.
+     * @return A {@code String} instance, never {@code null}.
+     */
+    public String getTimeVariable() {
+        return timeVariable;
+    }
 }

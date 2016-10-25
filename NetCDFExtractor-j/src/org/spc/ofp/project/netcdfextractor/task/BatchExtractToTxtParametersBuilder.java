@@ -44,6 +44,7 @@ public final class BatchExtractToTxtParametersBuilder {
         copy.periodSize = delegated.periodSize;
         copy.periodUnit = delegated.periodUnit;
         copy.startDate = delegated.startDate;
+        copy.timeVariable = delegated.timeVariable;
         delegated.files
                 .entrySet()
                 .forEach(entry -> {
@@ -140,6 +141,16 @@ public final class BatchExtractToTxtParametersBuilder {
      */
     public BatchExtractToTxtParametersBuilder startDate(final ZonedDateTime value) {
         delegated.startDate = (value == null) ? BatchExtractToTxtParameters.DEFAULT_START_DATE : value;
+        return this;
+    }
+
+    /**
+     * Sets the time variable.
+     * @param value The new value.
+     * @return A {@code BatchExtractToTxtParametersBuilder} instance, never {@code null}.
+     */
+    public BatchExtractToTxtParametersBuilder timeVariable(final String value) {
+        delegated.timeVariable = (value == null) ? BatchExtractToTxtParameters.DEFAULT_TIME_VARIABLE : value;
         return this;
     }
 

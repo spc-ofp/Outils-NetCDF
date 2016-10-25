@@ -12,16 +12,12 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.chrono.Chronology;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -35,7 +31,6 @@ import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
@@ -44,11 +39,11 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
-import org.spc.ofp.project.netcdfextractor.Main;
 import org.spc.ofp.project.netcdfextractor.scene.ControllerBase;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParameters;
 import org.spc.ofp.project.netcdfextractor.task.BatchExtractToTxtParametersBuilder;
 import org.spc.ofp.project.netcdfextractor.task.NetCDFUtils;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.time.CalendarDate;
@@ -88,6 +83,8 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
     private CheckBox includeColumnHeaderCheck;
     @FXML
     private Text timeDescriptionText;
+    @FXML
+    private ComboBox<String> timeVariableCombo;
     @FXML
     private Spinner<Integer> timeUnitSpinner;
     @FXML
@@ -348,7 +345,32 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             final Path source = fileIterator.next();
             timeEditing = true;
             try (final NetcdfFile netcdf = NetcdfFile.open(source.toString())) {
-                final Variable timeVariable = netcdf.findVariable("time"); // NOI18N.
+                // Select time variable.
+                final String timeVariableName = parameters.getTimeVariable();
+                Variable timeVariable = netcdf.findVariable((timeVariableName == null) ? BatchExtractToTxtParameters.DEFAULT_TIME_VARIABLE : timeVariableName);
+                if (timeVariable != null) {
+                    if (timeVariableCombo.getItems().isEmpty()) {
+                        timeVariableCombo.getItems().setAll(timeVariableName);
+                        timeVariableCombo.getSelectionModel().select(0);
+                    }
+                } else {
+                    final String[] variables = netcdf.getDimensions()
+                            .stream()
+                            .map(Dimension::getShortName)
+                            .map(netcdf::findVariable)
+                            .filter(variable -> {
+                                final String standardName = variable.findAttribute("standard_name").getStringValue();  // NOI18N.
+                                return BatchExtractToTxtParameters.DEFAULT_TIME_VARIABLE.equals(standardName);
+                            })
+                            .map(Variable::getShortName)
+                            .toArray(String[]::new);
+                    timeVariableCombo.valueProperty().removeListener(timeVariableChangeListener);
+                    timeVariableCombo.getItems().setAll(variables);
+                    timeVariableCombo.getSelectionModel().select(0);
+                    timeVariableCombo.valueProperty().addListener(timeVariableChangeListener);
+                    timeVariable = netcdf.findVariable(timeVariableCombo.getValue());
+                }
+                // Apply date config.
                 final String timeUnitString = timeVariable.getUnitsString();
                 final CalendarDateUnit calendarDateUnit = CalendarDateUnit.of(ucar.nc2.time.Calendar.proleptic_gregorian.name(), timeUnitString);
                 final CalendarPeriod calendarPeriod = calendarDateUnit.getTimeUnit();
@@ -377,6 +399,16 @@ public final class ExtractConfigPaneController extends ControllerBase<ExtractCon
             updateTimeFormatterInParameters();
         });
     }
+
+    /**
+     * Called whenever the time variable changes.
+     */
+    private ChangeListener<String> timeVariableChangeListener = (observable, oldValue, newValue) -> {
+        parentNode().ifPresent(parent -> {
+            parent.getParametersBuilder().timeVariable(newValue);
+            applyDefaultDateConfig();
+        });
+    };
 
     @FXML
     private void handleDirButton() {
