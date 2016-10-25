@@ -54,13 +54,13 @@ public final class BatchExtractToTxtParameters {
     Object missingValue = DEFAULT_MISSING_VALUE;
 
     public static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
-    
+
     DateTimeFormatter dateTimeFormatter = DEFAULT_DATE_TIME_FORMATTER;
-    
+
     public DateTimeFormatter getDateTimeFormatter() {
         return dateTimeFormatter;
     }
-    
+
     /**
      * The value to be printed out when encountering a missing, fill or out of bounds value in the file.
      * @return The missing value, may be {@code null}.
@@ -165,7 +165,7 @@ public final class BatchExtractToTxtParameters {
 
     public static final ZonedDateTime DEFAULT_START_DATE = ZonedDateTime.parse("1970-01-01T00:00Z"); // NOI18N.
 
-    public ZonedDateTime startDate = DEFAULT_START_DATE;
+    ZonedDateTime startDate = DEFAULT_START_DATE;
 
     /**
      * Gets the start date of the calendar.
